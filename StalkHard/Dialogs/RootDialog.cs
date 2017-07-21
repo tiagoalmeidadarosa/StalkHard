@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
+using StalkHard.Services;
+using StalkHard.Models;
 
 namespace StalkHard.Dialogs
 {
@@ -17,13 +19,65 @@ namespace StalkHard.Dialogs
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
         {
+            var response = String.Empty;
             var activity = await result as Activity;
 
+            //Call API LUIS (Language Understanding Intelligent Service)
+            var responseLUIS = await Luis.GetResponse(activity);
+
+            //Trata resposta (DEVE SER CRIADO EM UM OUTRO MÉTODO)
+            if(responseLUIS != null)
+            {
+                //Verificar se a intent tem um score suficiente para ser usado
+                var intent = responseLUIS.topScoringIntent;
+                //var entity = new Models.Entity();
+
+                string descricao = string.Empty;
+                string informacao = string.Empty;
+
+                foreach (var item in responseLUIS.entities)
+                {
+                    switch(item.type)
+                    {
+                        case "Descricao":
+                            descricao = item.entity;
+                            break;
+                        case "Informacao":
+                            informacao = item.entity;
+                            break;
+                    }
+                }
+
+                if (intent.intent.Equals("BuscarInformacao"))
+                {
+                    if (!string.IsNullOrEmpty(descricao))
+                    {
+                        if (!string.IsNullOrEmpty(informacao))
+                        {
+                            response = "OK entendi! Estou preparando tudo... (" + descricao + " + " + informacao + ")";
+                            //Buscar informação das API, Facebook ou Twitter? Isso seria uma nova entidade?
+                        }
+                        else
+                        {
+                            response = "Não entendi qual informação você quer.";
+                        }
+                    }
+                    else
+                    {
+                        response = "Descreva especificamente o que você quer por favor.";
+                    }
+                }
+                else
+                {
+                    response = "Desculpe! Não entendi a sua intenção.";
+                }
+            }
+
             // calculate something for us to return
-            int length = (activity.Text ?? string.Empty).Length;
+            //int length = (activity.Text ?? string.Empty).Length;
 
             // return our reply to the user
-            await context.PostAsync($"You sent {activity.Text} which was {length} characters");
+            await context.PostAsync(response);
 
             context.Wait(MessageReceivedAsync);
         }
