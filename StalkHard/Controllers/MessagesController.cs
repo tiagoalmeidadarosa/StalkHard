@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
+using System.Collections.Generic;
+using Microsoft.Bot.Builder.Dialogs.Internals;
+using System.Linq;
+using Autofac;
 
 namespace StalkHard
 {
@@ -22,37 +26,68 @@ namespace StalkHard
             }
             else
             {
-                HandleSystemMessage(activity);
+                await HandleSystemMessage(activity);
             }
+
             var response = Request.CreateResponse(HttpStatusCode.OK);
             return response;
         }
 
-        private Activity HandleSystemMessage(Activity message)
+        private async Task<Activity> HandleSystemMessage(Activity message)
         {
-            if (message.Type == ActivityTypes.DeleteUserData)
+            switch(message.Type)
             {
-                // Implement user deletion here
-                // If we handle user deletion, return a real message
-            }
-            else if (message.Type == ActivityTypes.ConversationUpdate)
-            {
-                // Handle conversation state changes, like members being added and removed
-                // Use Activity.MembersAdded and Activity.MembersRemoved and Activity.Action for info
-                // Not available in all channels
-            }
-            else if (message.Type == ActivityTypes.ContactRelationUpdate)
-            {
-                // Handle add/remove from contact lists
-                // Activity.From + Activity.Action represent what happened
-            }
-            else if (message.Type == ActivityTypes.Typing)
-            {
-                // Handle knowing tha the user is typing
-            }
-            else if (message.Type == ActivityTypes.Ping)
-            {
+                case ActivityTypes.DeleteUserData:
+                    // Implement user deletion here
+                    // If we handle user deletion, return a real message
 
+                    break;
+                case ActivityTypes.ConversationUpdate:
+                    // Handle conversation state changes, like members being added and removed
+                    // Use Activity.MembersAdded and Activity.MembersRemoved and Activity.Action for info
+                    // Not available in all channels
+
+                    using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
+                    {
+                        var client = scope.Resolve<IConnectorClient>();
+                        if (message.MembersAdded != null && message.MembersAdded.Any())
+                        {
+                            foreach (var newMember in message.MembersAdded)
+                            {
+                                if (newMember.Id != message.Recipient.Id)
+                                {
+                                    var reply = message.CreateReply("Olá, em que posso ajudá-lo? Escolha uma das três opções para começarmos:");
+                                    reply.Type = ActivityTypes.Message;
+                                    reply.TextFormat = TextFormatTypes.Plain;
+
+                                    reply.SuggestedActions = new SuggestedActions()
+                                    {
+                                        Actions = new List<CardAction>()
+                                        {
+                                            new CardAction(){ Title = "Informações Básicas", Type=ActionTypes.ImBack, Value="Informações Básicas" },
+                                            new CardAction(){ Title = "Descobrir Algo", Type=ActionTypes.ImBack, Value="Descobrir Algo" },
+                                            new CardAction(){ Title = "Interesses", Type=ActionTypes.ImBack, Value="Interesses" }
+                                        }
+                                    };
+
+                                    await client.Conversations.ReplyToActivityAsync(reply);
+                                }
+                            }
+                        }
+                    }
+
+                    break;
+                case ActivityTypes.ContactRelationUpdate:
+                    // Handle add/remove from contact lists
+                    // Activity.From + Activity.Action represent what happened
+
+                    break;
+                case ActivityTypes.Typing:
+                    // Handle knowing tha the user is typing
+
+                    break;
+                case ActivityTypes.Ping:
+                    break;
             }
 
             return null;
