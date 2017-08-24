@@ -86,18 +86,15 @@ namespace StalkHard.Dialogs
                         response = "Desculpe! Não entendi a sua intenção.";
                     }
                 }
+
+                // return our reply to the user
+                await context.PostAsync(response);
             }
 
-            // calculate something for us to return
-            //int length = (activity.Text ?? string.Empty).Length;
-
-            // return our reply to the user
-            await context.PostAsync(response);
-
-            context.Wait(MessageReceivedAsync);
+            //context.Wait(this.MessageReceivedAsync);
         }
 
-        public async Task ResumeAfterDiscoverSomethingDialog(IDialogContext context, IAwaitable<string> result)
+        public async Task ResumeAfterDiscoverSomethingDialog(IDialogContext context, IAwaitable<object> result)
         {
             // Store the value that DiscoverSomethingDialog returned. 
             // (At this point, new order dialog has finished and returned some value to use within the root dialog.)

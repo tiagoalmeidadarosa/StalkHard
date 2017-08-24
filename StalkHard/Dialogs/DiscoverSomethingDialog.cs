@@ -27,6 +27,7 @@ namespace StalkHard.Dialogs
             await context.PostAsync(response);
 
             context.Wait(MessageReceivedAsync);
+            //context.Done("");
         }
     }
 }
