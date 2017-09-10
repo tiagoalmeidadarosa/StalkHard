@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StalkHard.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -12,6 +13,8 @@ namespace StalkHard
         protected void Application_Start()
         {
             GlobalConfiguration.Configure(WebApiConfig.Register);
+
+            DocumentDBRepository<Models.Login>.Initialize();
         }
     }
 }

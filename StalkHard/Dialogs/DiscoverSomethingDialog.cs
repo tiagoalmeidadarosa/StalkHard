@@ -5,6 +5,8 @@ using Microsoft.Bot.Connector;
 using StalkHard.Services;
 using StalkHard.Models;
 using System.Threading;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace StalkHard.Dialogs
 {
@@ -20,14 +22,52 @@ namespace StalkHard.Dialogs
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
         {
-            var response = String.Empty;
             var activity = await result as Activity;
 
-            // return our reply to the user
-            await context.PostAsync(response);
+            if (activity.Text.ToLower().Contains("voltar"))
+            {
+                context.Done(string.Empty);
+            }
+            else
+            {
+                string id = "71001bb7-810b-4413-afe8-a85e15b7151b"; //activity.From.Id
+                var item = await DocumentDBRepository<Login>.GetItemAsync(id);
 
-            context.Wait(MessageReceivedAsync);
-            //context.Done("");
+                List<CardAction> actions = new List<CardAction>();
+                foreach (var keyPhrase in item.KeyPhrases)
+                {
+                    //actions.Add(new CardAction() { Title = keyPhrase.Text, Type = ActionTypes.ImBack, Value = keyPhrase.References.FirstOrDefault().IdTweet, Text = "aaa", DisplayText = "bbb" });
+                    actions.Add(new CardAction() { Title = keyPhrase.Text, Type = ActionTypes.ImBack, Value = keyPhrase.Text });
+                }
+
+                var reply = activity.CreateReply("Separei alguns temas, selecione sobre o que você deseja descobrir:");
+                reply.Type = ActivityTypes.Message;
+                reply.TextFormat = TextFormatTypes.Plain;
+
+                reply.SuggestedActions = new SuggestedActions()
+                {
+                    Actions = actions
+                };
+
+                // return our reply to the user
+                await context.PostAsync(reply);
+
+                //context.Wait(MessageReceivedAsync);
+                //context.Done("");
+
+                await context.Forward(new SelectDiscoverSomethingDialog(), this.ResumeAfterSelectDiscoverSomethingDialog, activity, CancellationToken.None);
+            }
+        }
+
+        public async Task ResumeAfterSelectDiscoverSomethingDialog(IDialogContext context, IAwaitable<object> result)
+        {
+            // Store the value that DiscoverSomethingDialog returned. 
+            // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
+            var resultFromDiscoverSomething = await result as Activity;
+            await context.PostAsync(resultFromDiscoverSomething.Text);
+
+            // Again, wait for the next message from the user.
+            context.Wait(this.MessageReceivedAsync);
         }
     }
 }
