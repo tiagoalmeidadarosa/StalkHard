@@ -25,12 +25,13 @@ namespace StalkHard.Dialogs
 
             if(activity.Text.ToLower().Equals("descobrir algo"))
             {
-                //Análise do Twitter
+                //Análise a partir dos tweets, na busca de sentimentos
                 await context.Forward(new DiscoverSomethingDialog(), this.ResumeAfterDiscoverSomethingDialog, activity, CancellationToken.None);
             }
             else if (activity.Text.ToLower().Equals("interesses"))
             {
-                //Chama métodos da api do facebook
+                //Chama métodos da api do Facebook, para buscar os principais interesses
+                await context.Forward(new InterestsDialog(), this.ResumeAfterInterestsDialog, activity, CancellationToken.None);
             }
             else
             {
@@ -95,6 +96,17 @@ namespace StalkHard.Dialogs
         }
 
         public async Task ResumeAfterDiscoverSomethingDialog(IDialogContext context, IAwaitable<object> result)
+        {
+            // Store the value that DiscoverSomethingDialog returned. 
+            // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
+            //var resultFromDiscoverSomething = await result;
+            //await context.PostAsync($"New order dialog just told me this: {resultFromDiscoverSomething}");
+
+            // Again, wait for the next message from the user.
+            context.Wait(this.MessageReceivedAsync);
+        }
+
+        public async Task ResumeAfterInterestsDialog(IDialogContext context, IAwaitable<object> result)
         {
             // Store the value that DiscoverSomethingDialog returned. 
             // (At this point, new order dialog has finished and returned some value to use within the root dialog.)

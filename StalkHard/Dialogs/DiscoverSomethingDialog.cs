@@ -24,6 +24,7 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
+            //Verificar se é válida essa forma de retornar para um diálogo anterior
             if (activity.Text.ToLower().Contains("voltar"))
             {
                 context.Done(string.Empty);
@@ -36,7 +37,6 @@ namespace StalkHard.Dialogs
                 List<CardAction> actions = new List<CardAction>();
                 foreach (var keyPhrase in item.KeyPhrases)
                 {
-                    //actions.Add(new CardAction() { Title = keyPhrase.Text, Type = ActionTypes.ImBack, Value = keyPhrase.References.FirstOrDefault().IdTweet, Text = "aaa", DisplayText = "bbb" });
                     actions.Add(new CardAction() { Title = keyPhrase.Text, Type = ActionTypes.ImBack, Value = keyPhrase.Text });
                 }
 
@@ -52,10 +52,7 @@ namespace StalkHard.Dialogs
                 // return our reply to the user
                 await context.PostAsync(reply);
 
-                //context.Wait(MessageReceivedAsync);
-                //context.Done("");
-
-                await context.Forward(new SelectDiscoverSomethingDialog(), this.ResumeAfterSelectDiscoverSomethingDialog, activity, CancellationToken.None);
+                context.Call(new SelectDiscoverSomethingDialog(), this.ResumeAfterSelectDiscoverSomethingDialog);
             }
         }
 

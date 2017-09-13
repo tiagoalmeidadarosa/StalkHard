@@ -25,6 +25,7 @@ namespace StalkHard.Dialogs
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
         {
+            string textReply = "";
             var activity = await result as Activity;
 
             string id = "71001bb7-810b-4413-afe8-a85e15b7151b"; //activity.From.Id
@@ -54,25 +55,22 @@ namespace StalkHard.Dialogs
 
                 dynamic tweet = new JavaScriptSerializer().DeserializeObject(tweetJson);
 
-                var textTweet = "Ocorreu algum problema ao retornar o texto relacionado a este sentimento.";
+                textReply = "Ocorreu algum problema ao retornar o texto relacionado a este sentimento.";
                 if (!string.IsNullOrEmpty(tweet["text"]))
                 {
-                    textTweet = tweet["text"];
+                    textReply = "Em relação a isso, eu posso dizer que: \"" + tweet["text"] + "\"";
                 }
-                var reply = activity.CreateReply("Em relação a isso, eu posso dizer que: \"" + textTweet + "\"");
-                reply.Type = ActivityTypes.Message;
-                reply.TextFormat = TextFormatTypes.Plain;
-
-                // return our reply to the user
-                //await client.Conversations.ReplyToActivityAsync(reply);
-                //await context.PostAsync(reply);
-
-                context.Done(reply);
             }
             else
             {
-                context.Wait(MessageReceivedAsync);
-            }            
+                textReply = "Desculpe, eu não encontrei nada relacionado a sua solicitação!";
+            }
+
+            var reply = activity.CreateReply(textReply);
+            reply.Type = ActivityTypes.Message;
+            reply.TextFormat = TextFormatTypes.Plain;
+
+            context.Done(reply);
         }
     }
 }
