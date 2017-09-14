@@ -11,6 +11,7 @@ using System.Net;
 using System.IO;
 using System.Web.Script.Serialization;
 using Facebook;
+using System.Configuration;
 
 namespace StalkHard.Dialogs
 {
@@ -28,15 +29,19 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
-            string id = "71001bb7-810b-4413-afe8-a85e15b7151b"; //activity.From.Id
+            string id = "2d6e47ac-0e93-4e87-9200-31582d5a531c"; //activity.From.Id
             var item = await DocumentDBRepository<Login>.GetItemAsync(id);
 
             dynamic retorno = null;
             var client = new FacebookClient();
-            client.AccessToken = item.AccessTokenFacebook;
+            client.AccessToken = item.AccessTokenFacebook.AccessToken;
             client.Version = "v2.10";
-            client.AppId = "254366858409178";
-            client.AppSecret = "912c6b60ada739628902e18d09b36f4d";
+            client.AppId = ConfigurationManager.AppSettings["appIdFacebook"];
+            client.AppSecret = ConfigurationManager.AppSettings["appSecretFacebook"];
+
+            var reply = activity.CreateReply("Estes são alguns resultados que encontrei:");
+            reply.Type = ActivityTypes.Message;
+            reply.TextFormat = TextFormatTypes.Plain;
 
             switch (activity.Text)
             {
@@ -58,6 +63,20 @@ namespace StalkHard.Dialogs
                 case "Músicas":
                     break;
                 case "Fotos":
+                    //Colocar título, com o nome da foto?
+                    //Separar cada imagem em um cartão?
+                    //usar ThumbnailCard?
+                    retorno = client.Get("me/photos?fields=picture&limit=10");
+
+                    foreach(var photo in retorno.data)
+                    {
+                        reply.Attachments.Add(new Attachment()
+                        {
+                            ContentUrl = photo.picture,
+                            ContentType = "image/png"/*,
+                            Name = "Bender_Rodriguez.png"*/
+                        });
+                    }
                     break;
                 case "Televisão":
                     break;
@@ -68,10 +87,6 @@ namespace StalkHard.Dialogs
                 case "Times favoritos":
                     break;
             }
-
-            var reply = activity.CreateReply("Estes são alguns resultados que encontrei:");
-            reply.Type = ActivityTypes.Message;
-            reply.TextFormat = TextFormatTypes.Plain;
 
             /*reply.SuggestedActions = new SuggestedActions()
             {

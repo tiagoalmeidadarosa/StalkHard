@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.Documents;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace StalkHard.Models
@@ -10,7 +11,7 @@ namespace StalkHard.Models
         public string Id { get; set; }
 
         [JsonProperty(PropertyName = "accessTokenFacebook")]
-        public string AccessTokenFacebook { get; set; }
+        public FacebookAuthenticateResponse AccessTokenFacebook { get; set; }
 
         [JsonProperty(PropertyName = "accessTokenTwitter")]
         public TwitAuthenticateResponse AccessTokenTwitter { get; set; }
@@ -23,6 +24,21 @@ namespace StalkHard.Models
 
         [JsonProperty(PropertyName = "keyPhrases")]
         public List<KeyPhrase> KeyPhrases { get; set; } = new List<KeyPhrase>();
+    }
+
+    public class FacebookAuthenticateResponse
+    {
+        [JsonProperty(PropertyName = "access_token")]
+        public string AccessToken { get; set; }
+
+        [JsonProperty(PropertyName = "token_type")]
+        public string TokenType { get; set; }
+
+        [JsonProperty(PropertyName = "expires_in")] //The number of seconds until this access token expires.
+        public long ExpiresIn { get; set; }
+
+        [JsonProperty(PropertyName = "data_created")]
+        public DateTime DataCreated { get; set; }
     }
 
     public class TwitAuthenticateResponse

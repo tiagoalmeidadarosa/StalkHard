@@ -31,7 +31,7 @@ namespace StalkHard.Dialogs
             }
             else
             {
-                string id = "71001bb7-810b-4413-afe8-a85e15b7151b"; //activity.From.Id
+                string id = "2d6e47ac-0e93-4e87-9200-31582d5a531c"; //activity.From.Id
                 var item = await DocumentDBRepository<Login>.GetItemAsync(id);
 
                 List<CardAction> actions = new List<CardAction>();
@@ -60,8 +60,8 @@ namespace StalkHard.Dialogs
         {
             // Store the value that DiscoverSomethingDialog returned. 
             // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
-            var resultFromDiscoverSomething = await result as Activity;
-            await context.PostAsync(resultFromDiscoverSomething.Text);
+            var resultFromSelectDiscoverSomething = await result as Activity;
+            await context.PostAsync(resultFromSelectDiscoverSomething.Text);
 
             // Again, wait for the next message from the user.
             context.Wait(this.MessageReceivedAsync);

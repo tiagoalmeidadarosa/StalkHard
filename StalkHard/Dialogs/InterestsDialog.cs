@@ -60,8 +60,8 @@ namespace StalkHard.Dialogs
         {
             // Store the value that DiscoverSomethingDialog returned. 
             // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
-            //var resultFromDiscoverSomething = await result;
-            //await context.PostAsync($"New order dialog just told me this: {resultFromDiscoverSomething}");
+            var resultFromSelectInterestsDialog = await result as Activity;
+            await context.PostAsync(resultFromSelectInterestsDialog);
 
             // Again, wait for the next message from the user.
             context.Wait(this.MessageReceivedAsync);

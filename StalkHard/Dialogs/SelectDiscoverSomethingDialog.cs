@@ -28,7 +28,7 @@ namespace StalkHard.Dialogs
             string textReply = "";
             var activity = await result as Activity;
 
-            string id = "71001bb7-810b-4413-afe8-a85e15b7151b"; //activity.From.Id
+            string id = "2d6e47ac-0e93-4e87-9200-31582d5a531c"; //activity.From.Id
             var item = await DocumentDBRepository<Login>.GetItemAsync(id);
 
             if(item.KeyPhrases.Count(k => k.Text.Equals(activity.Text)) > 0)
