@@ -34,13 +34,14 @@ namespace StalkHard.Dialogs
                 reply.Type = ActivityTypes.Message;
                 reply.TextFormat = TextFormatTypes.Plain;
                 reply.InputHint = InputHints.IgnoringInput; //Isso deveria desabilitar o input de texto do user
+                reply.AttachmentLayout = AttachmentLayoutTypes.List;
 
                 reply.SuggestedActions = new SuggestedActions()
                 {
                     Actions = new List<CardAction>()
                     {
-                        new CardAction(){ Title = "Informações Básicas", Type=ActionTypes.ImBack, Value="Informações Básicas" },
                         new CardAction(){ Title = "Descobrir Algo", Type=ActionTypes.ImBack, Value="Descobrir Algo" },
+                        new CardAction(){ Title = "Informações Básicas", Type=ActionTypes.ImBack, Value="Informações Básicas" },
                         new CardAction(){ Title = "Interesses", Type=ActionTypes.ImBack, Value="Interesses" }
                     }
                 };

@@ -35,19 +35,19 @@ namespace StalkHard.Dialogs
             {
                 Actions = new List<CardAction>()
                 {
-                    new CardAction(){ Title = "Esportes", Type=ActionTypes.ImBack, Value="Esportes" },
-                    new CardAction(){ Title = "Livros", Type=ActionTypes.ImBack, Value="Livros" },
-                    new CardAction(){ Title = "Eventos", Type=ActionTypes.ImBack, Value="Eventos" },
-                    new CardAction(){ Title = "Jogos", Type=ActionTypes.ImBack, Value="Jogos" },
                     new CardAction(){ Title = "Amigos", Type=ActionTypes.ImBack, Value="Amigos" },
-                    new CardAction(){ Title = "Gostos", Type=ActionTypes.ImBack, Value="Gostos" },
-                    new CardAction(){ Title = "Filmes", Type=ActionTypes.ImBack, Value="Filmes" },
-                    new CardAction(){ Title = "Músicas", Type=ActionTypes.ImBack, Value="Música" },
-                    new CardAction(){ Title = "Fotos", Type=ActionTypes.ImBack, Value="Fotos" },
-                    new CardAction(){ Title = "Televisão", Type=ActionTypes.ImBack, Value="Televisão" },
-                    new CardAction(){ Title = "Vídeos", Type=ActionTypes.ImBack, Value="Vídeos" },
                     new CardAction(){ Title = "Atletas favoritos", Type=ActionTypes.ImBack, Value="Eventos" },
-                    new CardAction(){ Title = "Times favoritos", Type=ActionTypes.ImBack, Value="Eventos" }
+                    new CardAction(){ Title = "Esportes", Type=ActionTypes.ImBack, Value="Esportes" },
+                    new CardAction(){ Title = "Eventos", Type=ActionTypes.ImBack, Value="Eventos" },
+                    new CardAction(){ Title = "Filmes", Type=ActionTypes.ImBack, Value="Filmes" },
+                    new CardAction(){ Title = "Fotos", Type=ActionTypes.ImBack, Value="Fotos" },
+                    new CardAction(){ Title = "Gostos", Type=ActionTypes.ImBack, Value="Gostos" },
+                    new CardAction(){ Title = "Jogos", Type=ActionTypes.ImBack, Value="Jogos" },
+                    new CardAction(){ Title = "Livros", Type=ActionTypes.ImBack, Value="Livros" },
+                    new CardAction(){ Title = "Músicas", Type=ActionTypes.ImBack, Value="Música" },
+                    new CardAction(){ Title = "Televisão", Type=ActionTypes.ImBack, Value="Televisão" },
+                    new CardAction(){ Title = "Times favoritos", Type=ActionTypes.ImBack, Value="Eventos" },
+                    new CardAction(){ Title = "Vídeos", Type=ActionTypes.ImBack, Value="Vídeos" }
                 }
             };
 
