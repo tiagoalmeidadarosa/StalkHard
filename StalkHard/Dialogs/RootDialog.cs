@@ -5,6 +5,10 @@ using Microsoft.Bot.Connector;
 using StalkHard.Services;
 using StalkHard.Models;
 using System.Threading;
+using System.Collections.Generic;
+using Microsoft.Bot.Builder.Dialogs.Internals;
+using Autofac;
+using System.Linq;
 
 namespace StalkHard.Dialogs
 {
@@ -20,101 +24,31 @@ namespace StalkHard.Dialogs
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
         {
-            var response = String.Empty;
-            var activity = await result as Activity;
+            var message = await result as Activity;
 
-            if(activity.Text.ToLower().Equals("descobrir algo"))
+            using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
             {
-                //Análise a partir dos tweets, na busca de sentimentos
-                await context.Forward(new DiscoverSomethingDialog(), this.ResumeAfterDiscoverSomethingDialog, activity, CancellationToken.None);
-            }
-            else if (activity.Text.ToLower().Equals("interesses"))
-            {
-                //Chama métodos da api do Facebook, para buscar os principais interesses
-                await context.Forward(new InterestsDialog(), this.ResumeAfterInterestsDialog, activity, CancellationToken.None);
-            }
-            else
-            {
-                //Informações Básicas ou qualquer outra coisa
+                var client = scope.Resolve<IConnectorClient>();
+                
+                var reply = message.CreateReply("Em que posso ajudá-lo? Defina seu tipo de busca selecionando uma das três opções abaixo:");
+                reply.Type = ActivityTypes.Message;
+                reply.TextFormat = TextFormatTypes.Plain;
+                reply.InputHint = InputHints.IgnoringInput; //Isso deveria desabilitar o input de texto do user
 
-                //Call API LUIS (Language Understanding Intelligent Service)
-                var responseLUIS = await Luis.GetResponse(activity);
-
-                //Trata resposta (DEVE SER CRIADO EM UM OUTRO MÉTODO)
-                if (responseLUIS != null)
+                reply.SuggestedActions = new SuggestedActions()
                 {
-                    //Verificar se a intent tem um score suficiente para ser usado
-                    var intent = responseLUIS.topScoringIntent;
-                    //var entity = new Models.Entity();
-
-                    string descricao = string.Empty;
-                    string informacao = string.Empty;
-
-                    foreach (var item in responseLUIS.entities)
+                    Actions = new List<CardAction>()
                     {
-                        switch (item.type)
-                        {
-                            case "Descricao":
-                                descricao = item.entity;
-                                break;
-                            case "Informacao":
-                                informacao = item.entity;
-                                break;
-                        }
+                        new CardAction(){ Title = "Informações Básicas", Type=ActionTypes.ImBack, Value="Informações Básicas" },
+                        new CardAction(){ Title = "Descobrir Algo", Type=ActionTypes.ImBack, Value="Descobrir Algo" },
+                        new CardAction(){ Title = "Interesses", Type=ActionTypes.ImBack, Value="Interesses" }
                     }
+                };
 
-                    if (intent.intent.Equals("BuscarInformacao"))
-                    {
-                        if (!string.IsNullOrEmpty(descricao))
-                        {
-                            if (!string.IsNullOrEmpty(informacao))
-                            {
-                                response = "OK entendi! Estou preparando tudo... (" + descricao + " + " + informacao + ")";
-                                //Buscar informação das API, Facebook ou Twitter? Isso seria uma nova entidade?
-                            }
-                            else
-                            {
-                                response = "Não entendi qual informação você quer.";
-                            }
-                        }
-                        else
-                        {
-                            response = "Descreva especificamente o que você quer por favor.";
-                        }
-                    }
-                    else
-                    {
-                        response = "Desculpe! Não entendi a sua intenção.";
-                    }
-                }
+                await client.Conversations.ReplyToActivityAsync(reply);
 
-                // return our reply to the user
-                await context.PostAsync(response);
+                context.Call(new SelectRootDialog(), null);
             }
-
-            //context.Wait(this.MessageReceivedAsync);
-        }
-
-        public async Task ResumeAfterDiscoverSomethingDialog(IDialogContext context, IAwaitable<object> result)
-        {
-            // Store the value that DiscoverSomethingDialog returned. 
-            // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
-            //var resultFromDiscoverSomething = await result;
-            //await context.PostAsync($"New order dialog just told me this: {resultFromDiscoverSomething}");
-
-            // Again, wait for the next message from the user.
-            context.Wait(this.MessageReceivedAsync);
-        }
-
-        public async Task ResumeAfterInterestsDialog(IDialogContext context, IAwaitable<object> result)
-        {
-            // Store the value that DiscoverSomethingDialog returned. 
-            // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
-            //var resultFromDiscoverSomething = await result;
-            //await context.PostAsync($"New order dialog just told me this: {resultFromDiscoverSomething}");
-
-            // Again, wait for the next message from the user.
-            context.Wait(this.MessageReceivedAsync);
         }
     }
 }

@@ -111,7 +111,7 @@ namespace StalkHard.Dialogs
             context.Done(reply);
         }
 
-        public async Task ResumeAfterSelectInterestsDialog(IDialogContext context, IAwaitable<object> result)
+        /*public async Task ResumeAfterSelectInterestsDialog(IDialogContext context, IAwaitable<object> result)
         {
             // Store the value that DiscoverSomethingDialog returned. 
             // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
@@ -120,7 +120,7 @@ namespace StalkHard.Dialogs
 
             // Again, wait for the next message from the user.
             context.Wait(this.MessageReceivedAsync);
-        }
+        }*/
     }
 }
  

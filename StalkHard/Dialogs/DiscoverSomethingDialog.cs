@@ -63,8 +63,9 @@ namespace StalkHard.Dialogs
             var resultFromSelectDiscoverSomething = await result as Activity;
             await context.PostAsync(resultFromSelectDiscoverSomething.Text);
 
-            // Again, wait for the next message from the user.
-            context.Wait(this.MessageReceivedAsync);
+            // Reseta pilha de diálogos e retorna para o diálogo central
+            context.Reset();
+            context.Call(new RootDialog(), null);
         }
     }
 }

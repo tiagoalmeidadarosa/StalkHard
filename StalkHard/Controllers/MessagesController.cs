@@ -46,8 +46,8 @@ namespace StalkHard
                     // Handle conversation state changes, like members being added and removed
                     // Use Activity.MembersAdded and Activity.MembersRemoved and Activity.Action for info
                     // Not available in all channels
-
-                    using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
+                    
+                    /*using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
                     {
                         var client = scope.Resolve<IConnectorClient>();
                         if (message.MembersAdded != null && message.MembersAdded.Any())
@@ -56,9 +56,10 @@ namespace StalkHard
                             {
                                 if (newMember.Id != message.Recipient.Id)
                                 {
-                                    var reply = message.CreateReply("Olá, em que posso ajudá-lo? Escolha uma das três opções para começarmos:");
+                                    var reply = message.CreateReply("Olá, em que posso ajudá-lo? Escolha uma das três opções:");
                                     reply.Type = ActivityTypes.Message;
                                     reply.TextFormat = TextFormatTypes.Plain;
+                                    reply.InputHint = InputHints.IgnoringInput; //Isso deveria desabilitar o input de texto do user
 
                                     reply.SuggestedActions = new SuggestedActions()
                                     {
@@ -71,10 +72,12 @@ namespace StalkHard
                                     };
 
                                     await client.Conversations.ReplyToActivityAsync(reply);
+
+                                    context.Call(new SelectRootDialog(), null);
                                 }
                             }
                         }
-                    }
+                    }*/
 
                     break;
                 case ActivityTypes.ContactRelationUpdate:

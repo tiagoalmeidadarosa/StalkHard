@@ -119,6 +119,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
+    <Compile Include="Dialogs\SelectRootDialog.cs" />
     <Compile Include="Dialogs\SelectInterestsDialog.cs" />
     <Compile Include="Dialogs\InterestsDialog.cs" />
     <Compile Include="Dialogs\SelectDiscoverSomethingDialog.cs" />
