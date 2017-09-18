@@ -23,12 +23,12 @@ namespace StalkHard.Dialogs
             var response = String.Empty;
             var activity = await result as Activity;
 
-            if(activity.Text.ToLower().Equals("descobrir algo"))
+            if(activity.Text.ToUpper().Equals("DESCOBRIR ALGO"))
             {
                 //Análise a partir dos tweets, na busca de sentimentos
                 await context.Forward(new DiscoverSomethingDialog(), this.ResumeAfterDiscoverSomethingDialog, activity, CancellationToken.None);
             }
-            else if (activity.Text.ToLower().Equals("interesses"))
+            else if (activity.Text.ToUpper().Equals("INTERESSES"))
             {
                 //Chama métodos da api do Facebook, para buscar os principais interesses
                 await context.Forward(new InterestsDialog(), this.ResumeAfterInterestsDialog, activity, CancellationToken.None);
