@@ -30,7 +30,7 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
-            string id = "3d58e7d8-344c-408c-9d27-cb9064f7141e"; //activity.From.Id
+            string id = "2d6e47ac-0e93-4e87-9200-31582d5a531c"; //activity.From.Id
             var item = await DocumentDBRepository<Login>.GetItemAsync(id);
 
             var client = new FacebookClient();
@@ -49,11 +49,59 @@ namespace StalkHard.Dialogs
 
             switch (activity.Text)
             {
-                case "Amigos":
-                    break;
+                /*case "Amigos":
+                    reply.AttachmentLayout = AttachmentLayoutTypes.List;
+
+                    retorno = client.Get("me/friends?fields=name");
+
+                    List<CardElement> cardElements = new List<CardElement>();
+
+                    foreach (var friend in retorno.data)
+                    {
+                        cardElements.Add(new TextBlock { Text = friend.name, Size = TextSize.Small });
+                    }
+
+                    AdaptiveCard adaptiveCard = new AdaptiveCard()
+                    {
+                        Body = cardElements
+                    };
+
+                    reply.Attachments.Add(new Attachment { ContentType = "application/vnd.microsoft.card.adaptive", Content = adaptiveCard });
+
+                    break;*/
                 case "Atletas favoritos":
+                    reply.AttachmentLayout = AttachmentLayoutTypes.List;
+
+                    retorno = client.Get("me?fields=favorite_athletes");
+
+                    foreach (var athlete in retorno.favorite_athletes)
+                    {
+                        HeroCard plCard = new HeroCard()
+                        {
+                            Title = athlete.name
+                        };
+
+                        Attachment attachment = plCard.ToAttachment();
+                        reply.Attachments.Add(attachment);
+                    }
+
                     break;
                 case "Esportes":
+                    reply.AttachmentLayout = AttachmentLayoutTypes.List;
+
+                    retorno = client.Get("me?fields=sports");
+
+                    foreach (var sport in retorno.sports)
+                    {
+                        HeroCard plCard = new HeroCard()
+                        {
+                            Title = sport.name
+                        };
+
+                        Attachment attachment = plCard.ToAttachment();
+                        reply.Attachments.Add(attachment);
+                    }
+
                     break;
                 case "Eventos":
                     retorno = client.Get("me/events?fields=name,cover");
@@ -84,6 +132,36 @@ namespace StalkHard.Dialogs
 
                     break;
                 case "Filmes":
+                    //FILMES JÁ ASSISTIDOS:
+                    //retorno = client.Get("me/video.watches?fields=data");
+                    retorno = client.Get("me/movies?fields=name,genre,description,link,cover");
+
+                    foreach (var movie in retorno.data)
+                    {
+                        List<CardImage> cardImages = new List<CardImage>();
+                        cardImages.Add(new CardImage(url: movie.cover.source));
+
+                        List<CardAction> cardButtons = new List<CardAction>();
+                        cardButtons.Add(new CardAction()
+                        {
+                            Value = movie.link,
+                            Type = "openUrl",
+                            Title = "Link do Filme"
+                        });
+
+                        HeroCard plCard = new HeroCard()
+                        {
+                            Title = movie.name,
+                            Subtitle = movie.genre,
+                            Text = movie.description,
+                            Images = cardImages,
+                            Buttons = cardButtons
+                        };
+
+                        Attachment attachment = plCard.ToAttachment();
+                        reply.Attachments.Add(attachment);
+                    }
+
                     break;
                 case "Fotos":
                     retorno = client.Get("me/photos?fields=name,picture,link,webp_images");
@@ -113,7 +191,7 @@ namespace StalkHard.Dialogs
 
                         //ADAPTIVECARD : http://adaptivecards.io/explorer/#ActionOpenUrl
                         /*List<CardElement> cardElements = new List<CardElement>();
-                        cardElements.Add(new Image { Url = photo.picture, Size = ImageSize.Large, HorizontalAlignment = HorizontalAlignment.Center });
+                        cardElements.Add(new Image { Url = photo.picture.data.url, Size = ImageSize.Large, HorizontalAlignment = HorizontalAlignment.Center });
                         cardElements.Add(new TextBlock { Text = photo.name, Size = TextSize.Small });
 
                         List<ActionBase> cardActions = new List<ActionBase>();
@@ -132,33 +210,188 @@ namespace StalkHard.Dialogs
 
                     break;
                 case "Gostos":
+                    reply.AttachmentLayout = AttachmentLayoutTypes.List;
+
+                    retorno = client.Get("me/likes?fields=name,about,picture");
+
+                    foreach (var like in retorno.data)
+                    {
+                        List<CardImage> cardImages = new List<CardImage>();
+                        cardImages.Add(new CardImage(url: like.picture.data.url));
+
+                        ThumbnailCard plCard = new ThumbnailCard()
+                        {
+                            Title = like.name,
+                            Subtitle = like.about,
+                            Images = cardImages
+                        };
+
+                        Attachment attachment = plCard.ToAttachment();
+                        reply.Attachments.Add(attachment);
+                    }
+
                     break;
                 case "Jogos":
-                    break;
-                case "Livros":
-                    retorno = client.Get("me/books");
+                    retorno = client.Get("me/games?fields=name,about,link,picture,description");
 
-                    break;
-                case "Músicas":
-                    break;
-                case "Televisão":
-                    break;
-                case "Times favoritos":
-                    break;
-                case "Vídeos":
-                    retorno = client.Get("me/events?fields=description,source,permalink_url,thumbnails");
-
-                    //Falta arrumar muita coisa: https://docs.microsoft.com/en-us/bot-framework/rest-api/bot-framework-rest-connector-api-reference#videocard-object
-
-                    foreach (var video in retorno.data)
+                    foreach (var game in retorno.data)
                     {
-                        /*List<CardImage> cardImages = new List<CardImage>();
-                        cardImages.Add(new CardImage(url: video.));*/
+                        List<CardImage> cardImages = new List<CardImage>();
+                        cardImages.Add(new CardImage(url: game.picture.data.url));
 
                         List<CardAction> cardButtons = new List<CardAction>();
                         cardButtons.Add(new CardAction()
                         {
-                            Value = "www.facebook.com" + video.permalink_url,
+                            Value = game.link,
+                            Type = "openUrl",
+                            Title = "Link"
+                        });
+
+                        ThumbnailCard plCard = new ThumbnailCard()
+                        {
+                            Title = game.name,
+                            Text = game.description,
+                            Images = cardImages,
+                            Buttons = cardButtons
+                        };
+
+                        Attachment attachment = plCard.ToAttachment();
+                        reply.Attachments.Add(attachment);
+                    }
+
+                    break;
+                case "Livros":
+                    //LIVROS JÁ LIDOS:
+                    //retorno = client.Get("me/books.reads?fields=data");
+                    retorno = client.Get("me/books?fields=name,description,link,picture");
+
+                    foreach (var book in retorno.data)
+                    {
+                        /*List<CardImage> cardImages = new List<CardImage>();
+                        cardImages.Add(new CardImage(url: book.picture.data.url));*/
+
+                        List<CardAction> cardButtons = new List<CardAction>();
+                        cardButtons.Add(new CardAction()
+                        {
+                            Value = book.link,
+                            Type = "openUrl",
+                            Title = "Link do Livro"
+                        });
+
+                        HeroCard plCard = new HeroCard()
+                        {
+                            Title = book.name,
+                            Text = book.description,
+                            //Images = cardImages,
+                            Buttons = cardButtons
+                        };
+
+                        Attachment attachment = plCard.ToAttachment();
+                        reply.Attachments.Add(attachment);
+                    }
+
+                    break;
+                case "Músicas":
+                    //MÚSICAS JÁ ESCUTADAS:
+                    //retorno = client.Get("me/music.listens?fields=data");
+                    retorno = client.Get("me/music?fields=name,about,link,picture,genre");
+
+                    foreach (var music in retorno.data)
+                    {
+                        List<CardImage> cardImages = new List<CardImage>();
+                        cardImages.Add(new CardImage(url: music.picture.data.url));
+
+                        List<CardAction> cardButtons = new List<CardAction>();
+                        cardButtons.Add(new CardAction()
+                        {
+                            Value = music.link,
+                            Type = "openUrl",
+                            Title = "Link"
+                        });
+
+                        ThumbnailCard plCard = new ThumbnailCard()
+                        {
+                            Title = music.name,
+                            Subtitle = music.genre,
+                            Text = music.about,
+                            Images = cardImages,
+                            Buttons = cardButtons
+                        };
+
+                        Attachment attachment = plCard.ToAttachment();
+                        reply.Attachments.Add(attachment);
+                    }
+
+                    break;
+                case "Televisão":
+                    //PROGRAMAS DE TV JÁ ASSISTIDOS:
+                    //retorno = client.Get("me/video.watches?fields=data");
+                    retorno = client.Get("me/television?fields=name,genre,description,link,cover");
+
+                    foreach (var tv in retorno.data)
+                    {
+                        List<CardImage> cardImages = new List<CardImage>();
+                        cardImages.Add(new CardImage(url: tv.cover.source));
+
+                        List<CardAction> cardButtons = new List<CardAction>();
+                        cardButtons.Add(new CardAction()
+                        {
+                            Value = tv.link,
+                            Type = "openUrl",
+                            Title = "Link do Programa"
+                        });
+
+                        HeroCard plCard = new HeroCard()
+                        {
+                            Title = tv.name,
+                            Subtitle = tv.genre,
+                            Text = tv.description,
+                            Images = cardImages,
+                            Buttons = cardButtons
+                        };
+
+                        Attachment attachment = plCard.ToAttachment();
+                        reply.Attachments.Add(attachment);
+                    }
+
+                    break;
+                case "Times favoritos":
+                    reply.AttachmentLayout = AttachmentLayoutTypes.List;
+
+                    retorno = client.Get("me?fields=favorite_teams");
+
+                    foreach (var team in retorno.favorite_teams)
+                    {
+                        HeroCard plCard = new HeroCard()
+                        {
+                            Title = team.name
+                        };
+
+                        Attachment attachment = plCard.ToAttachment();
+                        reply.Attachments.Add(attachment);
+                    }
+
+                    break;
+                case "Vídeos":
+                    retorno = client.Get("me/videos?fields=description,source,permalink_url,thumbnails");
+
+                    foreach (var video in retorno.data)
+                    {
+                        ThumbnailUrl image = new ThumbnailUrl();
+                        image.Url = video.thumbnails.data[0].uri;
+                        foreach (var thumbnail in video.thumbnails.data)
+                        {
+                            if(thumbnail.is_preferred)
+                            {
+                                image.Url = thumbnail.uri;
+                                break;
+                            }
+                        }
+
+                        List<CardAction> cardButtons = new List<CardAction>();
+                        cardButtons.Add(new CardAction()
+                        {
+                            Value = "https://www.facebook.com" + video.permalink_url,
                             Type = "openUrl",
                             Title = "Link do Vídeo"
                         });
@@ -170,8 +403,7 @@ namespace StalkHard.Dialogs
                         {
                             Title = video.description,
                             Media = mediaUrl,
-                            //Images = cardImages,
-                            //Image = 
+                            Image = image,
                             Buttons = cardButtons
                         };
 

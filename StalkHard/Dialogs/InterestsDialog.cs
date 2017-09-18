@@ -35,8 +35,8 @@ namespace StalkHard.Dialogs
             {
                 Actions = new List<CardAction>()
                 {
-                    new CardAction(){ Title = "Amigos", Type=ActionTypes.ImBack, Value="Amigos" },
-                    new CardAction(){ Title = "Atletas favoritos", Type=ActionTypes.ImBack, Value="Eventos" },
+                    //new CardAction(){ Title = "Amigos", Type=ActionTypes.ImBack, Value="Amigos" },
+                    new CardAction(){ Title = "Atletas favoritos", Type=ActionTypes.ImBack, Value="Atletas favoritos" },
                     new CardAction(){ Title = "Esportes", Type=ActionTypes.ImBack, Value="Esportes" },
                     new CardAction(){ Title = "Eventos", Type=ActionTypes.ImBack, Value="Eventos" },
                     new CardAction(){ Title = "Filmes", Type=ActionTypes.ImBack, Value="Filmes" },
@@ -44,9 +44,9 @@ namespace StalkHard.Dialogs
                     new CardAction(){ Title = "Gostos", Type=ActionTypes.ImBack, Value="Gostos" },
                     new CardAction(){ Title = "Jogos", Type=ActionTypes.ImBack, Value="Jogos" },
                     new CardAction(){ Title = "Livros", Type=ActionTypes.ImBack, Value="Livros" },
-                    new CardAction(){ Title = "Músicas", Type=ActionTypes.ImBack, Value="Música" },
+                    new CardAction(){ Title = "Músicas", Type=ActionTypes.ImBack, Value="Músicas" },
                     new CardAction(){ Title = "Televisão", Type=ActionTypes.ImBack, Value="Televisão" },
-                    new CardAction(){ Title = "Times favoritos", Type=ActionTypes.ImBack, Value="Eventos" },
+                    new CardAction(){ Title = "Times favoritos", Type=ActionTypes.ImBack, Value="Times favoritos" },
                     new CardAction(){ Title = "Vídeos", Type=ActionTypes.ImBack, Value="Vídeos" }
                 }
             };
