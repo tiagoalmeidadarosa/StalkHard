@@ -70,7 +70,9 @@ namespace StalkHard.Dialogs
             reply.Type = ActivityTypes.Message;
             reply.TextFormat = TextFormatTypes.Plain;
 
-            context.Done(reply);
+            //context.Done(reply);
+            await context.PostAsync(reply);
+            context.Wait(this.MessageReceivedAsync);
         }
     }
 }

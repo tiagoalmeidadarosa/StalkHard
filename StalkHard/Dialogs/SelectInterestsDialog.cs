@@ -414,7 +414,9 @@ namespace StalkHard.Dialogs
                     break;
             }
 
-            context.Done(reply);
+            //context.Done(reply);
+            await context.PostAsync(reply);
+            context.Wait(this.MessageReceivedAsync);
         }
 
         /*public async Task ResumeAfterSelectInterestsDialog(IDialogContext context, IAwaitable<object> result)

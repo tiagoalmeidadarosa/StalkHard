@@ -13,6 +13,7 @@ using System.Web.Script.Serialization;
 using Facebook;
 using System.Configuration;
 using AdaptiveCards;
+using System.Globalization;
 
 namespace StalkHard.Dialogs
 {
@@ -59,7 +60,7 @@ namespace StalkHard.Dialogs
 
                 dynamic retorno = null;
 
-                if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.40) //40%
+                if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.15) //15%
                 {
                     string id = "2d6e47ac-0e93-4e87-9200-31582d5a531c"; //activity.From.Id
                     var item = await DocumentDBRepository<Login>.GetItemAsync(id);
@@ -69,6 +70,8 @@ namespace StalkHard.Dialogs
                     client.Version = "v2.10";
                     client.AppId = ConfigurationManager.AppSettings["appIdFacebook"];
                     client.AppSecret = ConfigurationManager.AppSettings["appSecretFacebook"];
+                    
+                    //E SE O RETORNO DA API DO FACEBOOK NÃO RETORNAR NADA? NÃO FIZ VALIDAÇÃO
 
                     switch (intent.intent)
                     {
@@ -83,7 +86,7 @@ namespace StalkHard.Dialogs
 
                             string birthday = retorno.birthday;
 
-                            DateTime dataNasc = Convert.ToDateTime(birthday);
+                            DateTime dataNasc = Convert.ToDateTime(birthday, CultureInfo.CreateSpecificCulture("en-US"));
                             string format = "dd/MM/yyyy";
 
                             // Retorna o número de anos
@@ -109,43 +112,54 @@ namespace StalkHard.Dialogs
 
                             foreach (var educ in retorno.education)
                             {
-                                if (educ.concentration != null)
+                                if(string.IsNullOrEmpty(response))
                                 {
-                                    response += educ.type + " - " + educ.school.name + ", " + educ.concentration.name + "\n";
+                                    response += educ.type + " - " + educ.school.name;
                                 }
                                 else
                                 {
-                                    response += educ.type + " - " + educ.school.name + "\n";
+                                    response += "\n" + educ.type + " - " + educ.school.name;
                                 }
                             }
 
                             break;
                         case "hometown":
-                            retorno = client.Get("me?fields=" + intent.intent);
+                            retorno = client.Get("me?fields=" + intent.intent + ",location");
 
-                            response = "Eu moro em " + retorno.hometown.name;
+                            if(retorno.hometown.name == retorno.location.name)
+                            {
+                                response = "Eu moro em " + retorno.location.name;
+                            }
+                            else
+                            {
+                                response = "Eu sou de " + retorno.hometown.name + ", mas moro em " + retorno.location.name;
+                            }
 
                             break;
                         case "interested_in":
                             retorno = client.Get("me?fields=" + intent.intent);
 
-                            response = "Atualmente estou interessado em " + string.Join(", ", retorno.interested_in);
+                            response = "Estou interessado em " + string.Join(", ", retorno.interested_in);
 
                             break;
                         case "languages":
                             retorno = client.Get("me?fields=" + intent.intent);
 
-                            response = "Eu falo ";
                             foreach (var language in retorno.languages)
                             {
-                                if (response.Equals("Eu falo "))
+                                if (response == "")
                                 {
-                                    response += language;
+                                    response += language.name;
                                 }
                                 else
                                 {
-                                    response += ", " + language;
+                                    response += ", " + language.name;
                                 }
+                            }
+
+                            if(!string.IsNullOrEmpty(response))
+                            {
+                                response = "Eu falo " + response;
                             }
 
                             break;
@@ -171,7 +185,7 @@ namespace StalkHard.Dialogs
                             retorno = client.Get("me?fields=" + intent.intent);
 
                             response = "Este sou eu! =)";
-                            attachments.Add(new Attachment { ThumbnailUrl = retorno.picture.data.url });
+                            attachments.Add(new Attachment { ContentType = "image/jpg", ContentUrl = retorno.picture.data.url });
 
                             break;
                         case "work":
@@ -179,29 +193,42 @@ namespace StalkHard.Dialogs
 
                             foreach (var work in retorno.work)
                             {
-                                response += work.position.name + " - " + work.employer.name + "\n";
+                                if (string.IsNullOrEmpty(response))
+                                {
+                                    response += work.position.name + " - " + work.employer.name;
+                                }
+                                else
+                                {
+                                    response += "\n" + work.position.name + " - " + work.employer.name;
+                                }
                             }
                                 
                             break;
                         default:
-                            response = "Desculpe! Não entendi a sua intenção.";
+                            response = "Desculpe! Eu não encontrei nada sobre isso.";
 
                             break;
                     }
                 }
                 else
                 {
-                    response = "Desculpe! Não entendi a sua intenção.";
+                    response = "Desculpe! Não entendi muito bem a sua intenção.";
                 }
             }
 
-            var reply = activity.CreateReply(response);
-            reply.Type = ActivityTypes.Message;
-            reply.TextFormat = TextFormatTypes.Plain;
-            reply.Attachments = attachments;
+            if(!string.IsNullOrEmpty(response))
+            {
+                var reply = activity.CreateReply(response);
+                reply.Type = ActivityTypes.Message;
+                reply.TextFormat = TextFormatTypes.Plain;
+                reply.Attachments = attachments;
 
-            // return our reply to the user
-            context.Done(reply);
+                // return our reply to the user
+                //context.Done(reply);
+                await context.PostAsync(reply);
+            }
+
+            context.Wait(this.MessageReceivedAsync);
         }
 
         /*public async Task ResumeAfterSelectInterestsDialog(IDialogContext context, IAwaitable<object> result)
