@@ -31,7 +31,7 @@ namespace StalkHard.Dialogs
             }
             else
             {
-                string id = "2d6e47ac-0e93-4e87-9200-31582d5a531c"; //activity.From.Id
+                string id = "a6661053-41a5-464a-bc4c-166379091881"; //activity.From.Id
                 var item = await DocumentDBRepository<Login>.GetItemAsync(id);
 
                 List<CardAction> actions = new List<CardAction>();

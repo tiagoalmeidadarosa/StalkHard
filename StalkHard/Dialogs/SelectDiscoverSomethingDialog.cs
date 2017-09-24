@@ -28,12 +28,15 @@ namespace StalkHard.Dialogs
             string textReply = "";
             var activity = await result as Activity;
 
-            string id = "2d6e47ac-0e93-4e87-9200-31582d5a531c"; //activity.From.Id
+            string id = "a6661053-41a5-464a-bc4c-166379091881"; //activity.From.Id
             var item = await DocumentDBRepository<Login>.GetItemAsync(id);
 
             if(item.KeyPhrases.Count(k => k.Text.Equals(activity.Text)) > 0)
             {
-                string idTweet = item.KeyPhrases.First(k => k.Text.Equals(activity.Text)).References.First().IdTweet;
+                var rand = new Random();
+                var keyPhrase = item.KeyPhrases.First(k => k.Text.Equals(activity.Text));
+
+                string idTweet = keyPhrase.References.ElementAt(rand.Next(keyPhrase.References.Count())).IdTweet;
 
                 // Retorna o tweet que se refere ao sentimento selecionado
                 var tweetFormat = "https://api.twitter.com/1.1/statuses/show.json?id={0}";

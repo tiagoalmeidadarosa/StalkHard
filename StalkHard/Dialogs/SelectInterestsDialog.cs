@@ -30,7 +30,7 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
-            string id = "2d6e47ac-0e93-4e87-9200-31582d5a531c"; //activity.From.Id
+            string id = "a6661053-41a5-464a-bc4c-166379091881"; //activity.From.Id
             var item = await DocumentDBRepository<Login>.GetItemAsync(id);
 
             var client = new FacebookClient();
@@ -47,7 +47,26 @@ namespace StalkHard.Dialogs
 
             dynamic retorno = null;
 
-            switch (activity.Text)
+            //Verifica se foi solicitado algum interesse via pergunta
+            string[] words = activity.Text.Split(' ');
+            if (words.Length > 1)
+            {
+                //Call API LUIS (Language Understanding Intelligent Service)
+                var responseLUIS = await Luis.GetResponse(activity);
+
+                //Trata resposta (DEVE SER CRIADO EM UM OUTRO MÉTODO)
+                if (responseLUIS != null)
+                {
+                    var intent = responseLUIS.topScoringIntent;
+
+                    if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.40) //40%
+                    {
+                        activity.Text = intent.intent;
+                    }
+                }
+            }
+
+            switch (activity.Text.ToUpper())
             {
                 /*case "Amigos":
                     reply.AttachmentLayout = AttachmentLayoutTypes.List;
@@ -69,7 +88,8 @@ namespace StalkHard.Dialogs
                     reply.Attachments.Add(new Attachment { ContentType = "application/vnd.microsoft.card.adaptive", Content = adaptiveCard });
 
                     break;*/
-                case "Atletas favoritos":
+                case "ATLETAS":
+                case "ATHLETES":
                     reply.AttachmentLayout = AttachmentLayoutTypes.List;
 
                     retorno = client.Get("me?fields=favorite_athletes");
@@ -86,7 +106,8 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Esportes":
+                case "ESPORTES":
+                case "SPORTS":
                     reply.AttachmentLayout = AttachmentLayoutTypes.List;
 
                     retorno = client.Get("me?fields=sports");
@@ -103,7 +124,8 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Eventos":
+                case "EVENTOS":
+                case "EVENTS":
                     retorno = client.Get("me/events?fields=name,cover");
 
                     foreach (var evento in retorno.data)
@@ -131,7 +153,8 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Filmes":
+                case "FILMES":
+                case "MOVIES":
                     //FILMES JÁ ASSISTIDOS:
                     //retorno = client.Get("me/video.watches?fields=data");
                     retorno = client.Get("me/movies?fields=name,genre,description,link,cover");
@@ -163,7 +186,8 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Fotos":
+                case "FOTOS":
+                case "PHOTOS":
                     retorno = client.Get("me/photos?fields=name,picture,link,webp_images");
 
                     foreach (var photo in retorno.data)
@@ -209,7 +233,8 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Gostos":
+                case "GOSTOS":
+                case "LIKES":
                     reply.AttachmentLayout = AttachmentLayoutTypes.List;
 
                     retorno = client.Get("me/likes?fields=name,about,picture");
@@ -231,7 +256,8 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Jogos":
+                case "JOGOS":
+                case "GAMES":
                     retorno = client.Get("me/games?fields=name,about,link,picture,description");
 
                     foreach (var game in retorno.data)
@@ -260,7 +286,8 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Livros":
+                case "LIVROS":
+                case "BOOKS":
                     //LIVROS JÁ LIDOS:
                     //retorno = client.Get("me/books.reads?fields=data");
                     retorno = client.Get("me/books?fields=name,description,link,picture");
@@ -291,7 +318,9 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Músicas":
+                case "MÚSICAS":
+                case "MUSICAS":
+                case "MUSIC":
                     //MÚSICAS JÁ ESCUTADAS:
                     //retorno = client.Get("me/music.listens?fields=data");
                     retorno = client.Get("me/music?fields=name,about,link,picture,genre");
@@ -323,7 +352,9 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Televisão":
+                case "TELEVISÃO":
+                case "TELEVISAO":
+                case "TELEVISION":
                     //PROGRAMAS DE TV JÁ ASSISTIDOS:
                     //retorno = client.Get("me/video.watches?fields=data");
                     retorno = client.Get("me/television?fields=name,genre,description,link,cover");
@@ -355,7 +386,8 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Times favoritos":
+                case "TIMES":
+                case "TEAMS":
                     reply.AttachmentLayout = AttachmentLayoutTypes.List;
 
                     retorno = client.Get("me?fields=favorite_teams");
@@ -372,7 +404,8 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                case "Vídeos":
+                case "VÍDEOS":
+                case "VIDEOS":
                     retorno = client.Get("me/videos?fields=description,source,permalink_url,thumbnails");
 
                     foreach (var video in retorno.data)
@@ -410,6 +443,10 @@ namespace StalkHard.Dialogs
                         Attachment attachment = plCard.ToAttachment();
                         reply.Attachments.Add(attachment);
                     }
+
+                    break;
+                default:
+                    reply.Text = "Desculpe! Eu não encontrei nada sobre isso.";
 
                     break;
             }
