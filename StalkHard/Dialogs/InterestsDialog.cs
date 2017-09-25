@@ -61,11 +61,9 @@ namespace StalkHard.Dialogs
             // Store the value that DiscoverSomethingDialog returned. 
             // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
             var resultFromSelectInterestsDialog = await result as Activity;
-            await context.PostAsync(resultFromSelectInterestsDialog);
 
-            // Reseta pilha de diálogos e retorna para o diálogo central
-            context.Reset();
-            context.Call(new RootDialog(), null);
+            // Fecha o diálogo, para ser chamado novamente no método de resume do diálogo anterior
+            context.Done(resultFromSelectInterestsDialog);
         }
     }
 }

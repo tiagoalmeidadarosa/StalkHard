@@ -8,11 +8,11 @@ using Microsoft.Bot.Builder.Scorables.Internals;
 
 namespace StalkHard.Dialogs
 {
-    public class CancelScorable : ScorableBase<IActivity, string, double>
+    public class BackScorable : ScorableBase<IActivity, string, double>
     {
         private readonly IDialogTask task;
 
-        public CancelScorable(IDialogTask task)
+        public BackScorable(IDialogTask task)
         {
             SetField.NotNull(out this.task, nameof(task), task);
         }
@@ -23,7 +23,7 @@ namespace StalkHard.Dialogs
 
             if (message != null && !string.IsNullOrWhiteSpace(message.Text))
             {
-                if (message.Text.Equals("Cancelar", StringComparison.InvariantCultureIgnoreCase))
+                if (message.Text.Equals("Voltar", StringComparison.InvariantCultureIgnoreCase))
                 {
                     return message.Text;
                 }
@@ -44,8 +44,10 @@ namespace StalkHard.Dialogs
 
         protected override async Task PostAsync(IActivity item, string state, CancellationToken token)
         {
-            //Chamar o diálogo anterior
-            this.task.Reset();
+            //Chama o diálogo anterior
+            //Conclui o diálogo atual, e no método de resume, faz chamar o diálogo anterior
+            this.task.Done(item);
+            await this.task.PollAsync(token);
         }
 
         protected override Task DoneAsync(IActivity item, string state, CancellationToken token)

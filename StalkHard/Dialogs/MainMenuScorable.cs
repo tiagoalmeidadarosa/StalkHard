@@ -5,6 +5,7 @@ using Microsoft.Bot.Builder.Dialogs.Internals;
 using Microsoft.Bot.Builder.Internals.Fibers;
 using Microsoft.Bot.Connector;
 using Microsoft.Bot.Builder.Scorables.Internals;
+using Microsoft.Bot.Builder.Dialogs;
 
 namespace StalkHard.Dialogs
 {
@@ -44,9 +45,14 @@ namespace StalkHard.Dialogs
 
         protected override async Task PostAsync(IActivity item, string state, CancellationToken token)
         {
+            //Reseta pilha de diálogos
             this.task.Reset();
-            //Chamar o diálogo inicial
-            this.task.Call(new RootDialog(), null);
+
+            //Faz a chamada para o diálogo inicial
+            var rootDialog = new RootDialog();
+            var interruption = rootDialog.Void<object, IMessageActivity>();
+            await this.task.Forward(interruption, null, item, token);
+            await this.task.PollAsync(token);
         }
 
         protected override Task DoneAsync(IActivity item, string state, CancellationToken token)

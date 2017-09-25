@@ -50,32 +50,30 @@ namespace StalkHard.Dialogs
             // Store the value that DiscoverSomethingDialog returned. 
             // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
             //var resultFromDiscoverSomething = await result;
-            //await context.PostAsync($"New order dialog just told me this: {resultFromDiscoverSomething}");
+            var resultFromSelectInterestsDialog = await result as Activity;
 
-            // Again, wait for the next message from the user.
-            context.Wait(this.MessageReceivedAsync);
+            // Chama o diálogo de Descobrir Algo novamente, pois foi solicitado um cancelar
+            await context.Forward(new DiscoverSomethingDialog(), this.ResumeAfterDiscoverSomethingDialog, resultFromSelectInterestsDialog, CancellationToken.None);
         }
 
         public async Task ResumeAfterInterestsDialog(IDialogContext context, IAwaitable<object> result)
         {
             // Store the value that DiscoverSomethingDialog returned. 
             // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
-            //var resultFromDiscoverSomething = await result;
-            //await context.PostAsync($"New order dialog just told me this: {resultFromDiscoverSomething}");
+            var resultFromSelectInterestsDialog = await result as Activity;
 
-            // Again, wait for the next message from the user.
-            context.Wait(this.MessageReceivedAsync);
+            // Chama o diálogo de Interesses novamente, pois foi solicitado um cancelar
+            await context.Forward(new InterestsDialog(), this.ResumeAfterInterestsDialog, resultFromSelectInterestsDialog, CancellationToken.None);
         }
 
         public async Task ResumeAfterInfosBasicDialog(IDialogContext context, IAwaitable<object> result)
         {
             // Store the value that DiscoverSomethingDialog returned. 
             // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
-            //var resultFromDiscoverSomething = await result;
-            //await context.PostAsync($"New order dialog just told me this: {resultFromDiscoverSomething}");
+            var resultFromSelectInterestsDialog = await result as Activity;
 
-            // Again, wait for the next message from the user.
-            context.Wait(this.MessageReceivedAsync);
+            // Chama o diálogo de Informações Básicas novamente, pois foi solicitado um cancelar
+            await context.Forward(new InfosBasicDialog(), this.ResumeAfterInfosBasicDialog, resultFromSelectInterestsDialog, CancellationToken.None);
         }
     }
 }

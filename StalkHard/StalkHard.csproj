@@ -123,7 +123,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="Dialogs\MainMenuScorable.cs" />
-    <Compile Include="Dialogs\CancelScorable.cs" />
+    <Compile Include="Dialogs\BackScorable.cs" />
     <Compile Include="Dialogs\InfosBasicDialog.cs" />
     <Compile Include="Dialogs\SelectInfosBasicDialog.cs" />
     <Compile Include="Dialogs\SelectRootDialog.cs" />

@@ -30,7 +30,7 @@ namespace StalkHard.Dialogs
             {
                 var client = scope.Resolve<IConnectorClient>();
                 
-                var reply = message.CreateReply("Em que posso ajudá-lo? \n\nA qualquer momento você pode: \nDigitar \"Cancelar\" - Para cancelar uma operação e voltar a um diálogo anterior \nDigitar \"Menu Principal\" - Para voltar ao menu inicial \n\nPrimeiramente, defina seu tipo de busca selecionando uma das três opções abaixo:");
+                var reply = message.CreateReply("Em que posso ajudá-lo? \n\nA qualquer momento você pode: \nDigitar \"Voltar\" - Para ser encaminhado a um diálogo anterior \nDigitar \"Menu Principal\" - Para voltar ao menu inicial \n\nPrimeiramente, defina seu tipo de busca selecionando uma das três opções abaixo:");
                 reply.Type = ActivityTypes.Message;
                 reply.TextFormat = TextFormatTypes.Plain;
                 reply.InputHint = InputHints.IgnoringInput; //Isso deveria desabilitar o input de texto do user
@@ -48,8 +48,18 @@ namespace StalkHard.Dialogs
 
                 await client.Conversations.ReplyToActivityAsync(reply);
 
-                context.Call(new SelectRootDialog(), null);
+                context.Call(new SelectRootDialog(), this.ResumeAfterSelectRootDialog);
             }
+        }
+
+        public async Task ResumeAfterSelectRootDialog(IDialogContext context, IAwaitable<object> result)
+        {
+            // Store the value that DiscoverSomethingDialog returned. 
+            // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
+            var resultFromSelectInterestsDialog = await result as Activity;
+
+            // Chama o diálogo para selecionar o diálogo inicial novamente, pois foi solicitado um cancelar
+            await context.Forward(new RootDialog(), null, resultFromSelectInterestsDialog, CancellationToken.None);
         }
     }
 }

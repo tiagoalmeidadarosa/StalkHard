@@ -13,7 +13,7 @@ namespace StalkHard
             base.Load(builder);
 
             builder
-                .Register(c => new CancelScorable(c.Resolve<IDialogTask>()))
+                .Register(c => new BackScorable(c.Resolve<IDialogTask>()))
                 .As<IScorable<IActivity, double>>()
                 .InstancePerLifetimeScope();
 
