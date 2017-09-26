@@ -28,8 +28,21 @@ namespace StalkHard.Dialogs
             var item = await DocumentDBRepository<Login>.GetItemAsync(id);
 
             List<CardAction> actions = new List<CardAction>();
-            foreach (var keyPhrase in item.KeyPhrases)
+            List<int> numerosRandom = new List<int>();
+            var rand = new Random();
+
+            for (int i = 0; i < 5; i++)
             {
+                int index = rand.Next(0, item.KeyPhrases.Count);
+                while(numerosRandom.Contains(index))
+                {
+                    index = rand.Next(0, item.KeyPhrases.Count);
+                }
+
+                numerosRandom.Add(index);
+
+                var keyPhrase = item.KeyPhrases.ElementAt(index);
+
                 actions.Add(new CardAction() { Title = keyPhrase.Text, Type = ActionTypes.ImBack, Value = keyPhrase.Text });
             }
 
