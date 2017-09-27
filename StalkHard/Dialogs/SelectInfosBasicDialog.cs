@@ -40,26 +40,12 @@ namespace StalkHard.Dialogs
             //Trata resposta (DEVE SER CRIADO EM UM OUTRO MÉTODO)
             if (responseLUIS != null)
             {
+                //Intenção com a melhor pontuação
                 var intent = responseLUIS.topScoringIntent;
-                //var entity = new Models.Entity();
-
-                //Verificar se a intent tem um score suficiente para ser usado
-
-                /*foreach (var item in responseLUIS.entities)
-                {
-                    switch (item.type)
-                    {
-                        case "Descricao":
-                            descricao = item.entity;
-                            break;
-                        case "Informacao":
-                            informacao = item.entity;
-                            break;
-                    }
-                }*/
 
                 dynamic retorno = null;
 
+                //Verifica se a intent tem um score suficiente para ser usado
                 if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.40) //40%
                 {
                     string id = "a6661053-41a5-464a-bc4c-166379091881"; //activity.From.Id
@@ -70,177 +56,162 @@ namespace StalkHard.Dialogs
                     client.Version = "v2.10";
                     client.AppId = ConfigurationManager.AppSettings["appIdFacebook"];
                     client.AppSecret = ConfigurationManager.AppSettings["appSecretFacebook"];
-                    
-                    //E SE O RETORNO DA API DO FACEBOOK NÃO RETORNAR NADA? NÃO FIZ VALIDAÇÃO
 
-                    switch (intent.intent)
+                    if(intent.intent.Equals("hometown")) //Único caso em que eu preciso de mais de uma propriedade
+                        retorno = client.Get("me?fields=" + intent.intent + ",location");
+                    else
+                        retorno = client.Get("me?fields=" + intent.intent);
+
+                    if (retorno.Count > 1)
                     {
-                        case "name":
-                            retorno = client.Get("me?fields=" + intent.intent);
+                        switch (intent.intent)
+                        {
+                            case "name":
+                                response = "Meu nome é " + retorno.name + ", prazer em conhecê-lo! \U0001F600";
 
-                            response = "Meu nome é " + retorno.name + ", prazer em conhecê-lo! :)";
+                                break;
+                            case "birthday":
+                                string birthday = retorno.birthday;
 
-                            break;
-                        case "birthday":
-                            retorno = client.Get("me?fields=" + intent.intent);
+                                DateTime dataNasc = Convert.ToDateTime(birthday, CultureInfo.CreateSpecificCulture("en-US"));
+                                string format = "dd/MM/yyyy";
 
-                            string birthday = retorno.birthday;
+                                // Retorna o número de anos
+                                int anos = DateTime.Now.Year - dataNasc.Year;
 
-                            DateTime dataNasc = Convert.ToDateTime(birthday, CultureInfo.CreateSpecificCulture("en-US"));
-                            string format = "dd/MM/yyyy";
-
-                            // Retorna o número de anos
-                            int anos = DateTime.Now.Year - dataNasc.Year;
-
-                            // Se a data de aniversário não ocorreu ainda este ano, subtrair um ano a partir da idade
-                            if (DateTime.Now.Month < dataNasc.Month || (DateTime.Now.Month == dataNasc.Month && DateTime.Now.Day < dataNasc.Day))
-                            {
-                                anos--;
-                            }
-
-                            response = "Eu nasci em " + dataNasc.ToString(format) + ", tenho " + anos + " anos!";
-
-                            break;
-                        case "email":
-                            retorno = client.Get("me?fields=" + intent.intent);
-
-                            response = "Você pode me contatar no e-mail " + retorno.email + " ;)";
-
-                            break;
-                        case "education":
-                            retorno = client.Get("me?fields=" + intent.intent);
-
-                            foreach (var educ in retorno.education)
-                            {
-                                if(string.IsNullOrEmpty(response))
+                                // Se a data de aniversário não ocorreu ainda este ano, subtrair um ano a partir da idade
+                                if (DateTime.Now.Month < dataNasc.Month || (DateTime.Now.Month == dataNasc.Month && DateTime.Now.Day < dataNasc.Day))
                                 {
-                                    response += educ.type + " - " + educ.school.name;
+                                    anos--;
                                 }
-                                else
+
+                                response = "Eu nasci em " + dataNasc.ToString(format) + ", tenho " + anos + " anos!";
+
+                                break;
+                            case "email":
+                                response = "Você pode me contatar no e-mail " + retorno.email + " \U0001F609";
+
+                                break;
+                            case "education":
+                                foreach (var educ in retorno.education)
                                 {
-                                    response += "\n" + educ.type + " - " + educ.school.name;
+                                    if (string.IsNullOrEmpty(response))
+                                    {
+                                        response += educ.type + " - " + educ.school.name;
+                                    }
+                                    else
+                                    {
+                                        response += "\n" + educ.type + " - " + educ.school.name;
+                                    }
                                 }
-                            }
 
-                            break;
-                        case "hometown":
-                            retorno = client.Get("me?fields=" + intent.intent + ",location");
-
-                            if(retorno.hometown.name == retorno.location.name)
-                            {
-                                response = "Eu moro em " + retorno.location.name;
-                            }
-                            else
-                            {
-                                response = "Eu sou de " + retorno.hometown.name + ", mas moro em " + retorno.location.name;
-                            }
-
-                            break;
-                        case "interested_in":
-                            retorno = client.Get("me?fields=" + intent.intent);
-
-                            response = "Estou interessado em " + string.Join(", ", retorno.interested_in);
-
-                            break;
-                        case "languages":
-                            retorno = client.Get("me?fields=" + intent.intent);
-
-                            foreach (var language in retorno.languages)
-                            {
-                                if (response == "")
+                                if (!string.IsNullOrEmpty(response))
                                 {
-                                    response += language.name;
+                                    response = ("Este é o meu histórico de ensino:\n\n" + response);
                                 }
-                                else
+
+                                break;
+                            case "hometown":
+                                if (retorno.Count == 3)
                                 {
-                                    response += ", " + language.name;
+                                    if (retorno.hometown.name == retorno.location.name)
+                                    {
+                                        response = "Eu moro em " + retorno.location.name;
+                                    }
+                                    else
+                                    {
+                                        response = "Eu sou de " + retorno.hometown.name + ", mas moro em " + retorno.location.name;
+                                    }
                                 }
-                            }
 
-                            if(!string.IsNullOrEmpty(response))
-                            {
-                                response = "Eu falo " + response;
-                            }
+                                break;
+                            case "interested_in":
+                                response = "Estou interessado em " + string.Join(", ", retorno.interested_in);
 
-                            break;
-                        case "relationship_status":
-                            retorno = client.Get("me?fields=" + intent.intent);
-
-                            response = "Atualmente estou " + retorno.relationship_status;
-
-                            break;
-                        case "religion":
-                            retorno = client.Get("me?fields=" + intent.intent);
-
-                            response = "Falando em religião, eu sou " + retorno.religion;
-
-                            break;
-                        case "website":
-                            retorno = client.Get("me?fields=" + intent.intent);
-
-                            response = "Meu site na web é " + retorno.website;
-
-                            break;
-                        case "picture":
-                            retorno = client.Get("me?fields=" + intent.intent);
-
-                            response = "Este sou eu! =)";
-                            attachments.Add(new Attachment { ContentType = "image/jpg", ContentUrl = retorno.picture.data.url });
-
-                            break;
-                        case "work":
-                            retorno = client.Get("me?fields=" + intent.intent);
-
-                            foreach (var work in retorno.work)
-                            {
-                                if (string.IsNullOrEmpty(response))
+                                break;
+                            case "languages":
+                                foreach (var language in retorno.languages)
                                 {
-                                    response += work.position.name + " - " + work.employer.name;
+                                    if (response == "")
+                                    {
+                                        response += language.name;
+                                    }
+                                    else
+                                    {
+                                        response += ", " + language.name;
+                                    }
                                 }
-                                else
-                                {
-                                    response += "\n" + work.position.name + " - " + work.employer.name;
-                                }
-                            }
-                                
-                            break;
-                        default:
-                            response = "Desculpe! Eu não encontrei nada sobre isso.";
 
-                            break;
+                                if (!string.IsNullOrEmpty(response))
+                                {
+                                    response = "Eu falo " + response;
+                                }
+
+                                break;
+                            case "relationship_status":
+                                response = "Atualmente estou " + retorno.relationship_status;
+
+                                break;
+                            case "religion":
+                                response = "Falando em religião, eu sou " + retorno.religion;
+
+                                break;
+                            case "website":
+                                response = "Meu site na web é " + retorno.website;
+
+                                break;
+                            case "picture":
+                                response = "Este sou eu! \U0001F603";
+                                attachments.Add(new Attachment { ContentType = "image/jpg", ContentUrl = retorno.picture.data.url });
+
+                                break;
+                            case "work":
+                                foreach (var work in retorno.work)
+                                {
+                                    if (string.IsNullOrEmpty(response))
+                                    {
+                                        response += work.position.name + " - " + work.employer.name;
+                                    }
+                                    else
+                                    {
+                                        response += "\n" + work.position.name + " - " + work.employer.name;
+                                    }
+                                }
+
+                                if (!string.IsNullOrEmpty(response))
+                                {
+                                    response = ("Estas são as minhas experiências profissionais em ordem decrescente de período:\n\n" + response);
+                                }
+
+                                break;
+                            default:
+                                response = "Desculpe! Não estou habilitado para falar sobre isso \U0001F614";
+
+                                break;
+                        }
                     }
                 }
                 else
                 {
-                    response = "Desculpe! Não entendi muito bem a sua intenção.";
+                    response = "Desculpe! Analisei a sua pergunta e não entendi muito bem a sua solicitação \U0001F630";
                 }
             }
 
-            if(!string.IsNullOrEmpty(response))
+            if(string.IsNullOrEmpty(response))
             {
-                var reply = activity.CreateReply(response);
-                reply.Type = ActivityTypes.Message;
-                reply.TextFormat = TextFormatTypes.Plain;
-                reply.Attachments = attachments;
-
-                // return our reply to the user
-                //context.Done(reply);
-                await context.PostAsync(reply);
+                response = "Minhas pesquisas não retornaram um valor satisfatório, talvez a informação não esteja habilitada pra mim \U0001F615";
             }
+
+            var reply = activity.CreateReply(response);
+            reply.Type = ActivityTypes.Message;
+            reply.TextFormat = TextFormatTypes.Plain;
+            reply.Attachments = attachments;
+
+            // return our reply to the user
+            await context.PostAsync(reply);
 
             context.Wait(this.MessageReceivedAsync);
         }
-
-        /*public async Task ResumeAfterSelectInterestsDialog(IDialogContext context, IAwaitable<object> result)
-        {
-            // Store the value that DiscoverSomethingDialog returned. 
-            // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
-            //var resultFromDiscoverSomething = await result;
-            //await context.PostAsync($"New order dialog just told me this: {resultFromDiscoverSomething}");
-
-            // Again, wait for the next message from the user.
-            context.Wait(this.MessageReceivedAsync);
-        }*/
     }
 }
  

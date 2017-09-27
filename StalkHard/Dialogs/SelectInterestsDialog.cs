@@ -39,7 +39,13 @@ namespace StalkHard.Dialogs
             client.AppId = ConfigurationManager.AppSettings["appIdFacebook"];
             client.AppSecret = ConfigurationManager.AppSettings["appSecretFacebook"];
 
-            var reply = activity.CreateReply("Estes são alguns resultados que encontrei:");
+            var rand = new Random();
+
+            string[] defaultMessages = { "Estes são alguns resultados que encontrei:",
+                                         "Aqui estão alguns dos principais resultados sobre isso:",
+                                         "Eu gosto disso, fique à vontade para saber mais:" };
+
+            var reply = activity.CreateReply(defaultMessages[rand.Next(defaultMessages.Count())]);
             reply.Type = ActivityTypes.Message;
             reply.TextFormat = TextFormatTypes.Plain;
             reply.AttachmentLayout = AttachmentLayoutTypes.Carousel;
@@ -169,7 +175,7 @@ namespace StalkHard.Dialogs
                         {
                             Value = movie.link,
                             Type = "openUrl",
-                            Title = "Link do Filme"
+                            Title = "Mais Informações"
                         });
 
                         HeroCard plCard = new HeroCard()
@@ -200,7 +206,7 @@ namespace StalkHard.Dialogs
                         {
                             Value = photo.link,
                             Type = "openUrl",
-                            Title = "Link da Foto"
+                            Title = "Mais Informações"
                         });
 
                         HeroCard plCard = new HeroCard()
@@ -270,7 +276,7 @@ namespace StalkHard.Dialogs
                         {
                             Value = game.link,
                             Type = "openUrl",
-                            Title = "Link"
+                            Title = "Mais Informações"
                         });
 
                         ThumbnailCard plCard = new ThumbnailCard()
@@ -302,7 +308,7 @@ namespace StalkHard.Dialogs
                         {
                             Value = book.link,
                             Type = "openUrl",
-                            Title = "Link do Livro"
+                            Title = "Mais Informações"
                         });
 
                         HeroCard plCard = new HeroCard()
@@ -335,7 +341,7 @@ namespace StalkHard.Dialogs
                         {
                             Value = music.link,
                             Type = "openUrl",
-                            Title = "Link"
+                            Title = "Mais Informações"
                         });
 
                         ThumbnailCard plCard = new ThumbnailCard()
@@ -369,7 +375,7 @@ namespace StalkHard.Dialogs
                         {
                             Value = tv.link,
                             Type = "openUrl",
-                            Title = "Link do Programa"
+                            Title = "Mais Informações"
                         });
 
                         HeroCard plCard = new HeroCard()
@@ -426,7 +432,7 @@ namespace StalkHard.Dialogs
                         {
                             Value = "https://www.facebook.com" + video.permalink_url,
                             Type = "openUrl",
-                            Title = "Link do Vídeo"
+                            Title = "Mais Informações"
                         });
 
                         List<MediaUrl> mediaUrl = new List<MediaUrl>();
@@ -445,27 +451,17 @@ namespace StalkHard.Dialogs
                     }
 
                     break;
-                default:
-                    reply.Text = "Desculpe! Eu não encontrei nada sobre isso.";
+            }
 
-                    break;
+            if(reply.Attachments.Count == 0)
+            {
+                reply.Text = "Desculpe! Eu não encontrei nada sobre isso \U0001F61E";
             }
 
             //context.Done(reply);
             await context.PostAsync(reply);
             context.Wait(this.MessageReceivedAsync);
         }
-
-        /*public async Task ResumeAfterSelectInterestsDialog(IDialogContext context, IAwaitable<object> result)
-        {
-            // Store the value that DiscoverSomethingDialog returned. 
-            // (At this point, new order dialog has finished and returned some value to use within the root dialog.)
-            //var resultFromDiscoverSomething = await result;
-            //await context.PostAsync($"New order dialog just told me this: {resultFromDiscoverSomething}");
-
-            // Again, wait for the next message from the user.
-            context.Wait(this.MessageReceivedAsync);
-        }*/
     }
 }
  

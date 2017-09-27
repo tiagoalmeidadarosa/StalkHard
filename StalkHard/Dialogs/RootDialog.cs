@@ -30,7 +30,7 @@ namespace StalkHard.Dialogs
             {
                 var client = scope.Resolve<IConnectorClient>();
                 
-                var reply = message.CreateReply("Em que posso ajudá-lo? \n\nA qualquer momento você pode: \nDigitar \"Voltar\" - Para ser encaminhado a um diálogo anterior \nDigitar \"Menu Principal\" - Para voltar ao menu inicial \n\nPrimeiramente, defina seu tipo de busca selecionando uma das três opções abaixo:");
+                var reply = message.CreateReply("Olá! Em que posso ajudá-lo? \n\nA qualquer momento você pode: \nDigitar \"Voltar\" - Para ser encaminhado a um diálogo anterior \nDigitar \"Menu Principal\" - Para voltar a este menu inicial \n\nPrimeiramente, defina seu tipo de busca selecionando uma das três opções abaixo:");
                 reply.Type = ActivityTypes.Message;
                 reply.TextFormat = TextFormatTypes.Plain;
                 reply.InputHint = InputHints.IgnoringInput; //Isso deveria desabilitar o input de texto do user

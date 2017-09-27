@@ -58,22 +58,26 @@ namespace StalkHard.Dialogs
 
                 dynamic tweet = new JavaScriptSerializer().DeserializeObject(tweetJson);
 
-                textReply = "Ocorreu algum problema ao retornar o texto relacionado a este sentimento.";
+                string[] defaultMessages = { "\"{0}\"",
+                                             "Em relação a isso, eu posso dizer que: \"{0}\"",
+                                             "Posso me referir a " + activity.Text + " dizendo que: \"{0}\"" };
+
+                textReply = "Ocorreu algum problema ao retornar o texto relacionado a este sentimento \U0001F621";
                 if (!string.IsNullOrEmpty(tweet["text"]))
                 {
-                    textReply = "Em relação a isso, eu posso dizer que: \"" + tweet["text"] + "\"";
+                    //Pegar uma mensagem aleatória para que a resposta não seja sempre a mesma
+                    textReply = string.Format(defaultMessages[rand.Next(defaultMessages.Count())], tweet["text"]);
                 }
             }
             else
             {
-                textReply = "Desculpe, eu não encontrei nada relacionado a sua solicitação!";
+                textReply = "Desculpe, eu não encontrei nada relacionado a sua solicitação \U0001F61E";
             }
 
             var reply = activity.CreateReply(textReply);
             reply.Type = ActivityTypes.Message;
             reply.TextFormat = TextFormatTypes.Plain;
 
-            //context.Done(reply);
             await context.PostAsync(reply);
             context.Wait(this.MessageReceivedAsync);
         }

@@ -27,7 +27,7 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
-            var reply = activity.CreateReply("Aqui você pode me conhecer melhor fazendo algumas perguntas básicas, fique à vontade! :). \nEx: \"Qual a sua idade?\"");
+            var reply = activity.CreateReply("Aqui você pode me conhecer melhor fazendo algumas perguntas básicas, fique à vontade! \U0001F600. \n\nEx: \"Qual a sua idade?\", \"Onde você trabalha?\"");
             reply.Type = ActivityTypes.Message;
             reply.TextFormat = TextFormatTypes.Plain;
 
