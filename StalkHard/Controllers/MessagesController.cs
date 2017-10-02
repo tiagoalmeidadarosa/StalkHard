@@ -82,14 +82,26 @@ namespace StalkHard
                     //Testando parâmetro de id de usuário passado para o chatterbot pelo site
                     using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
                     {
-                        var client = scope.Resolve<IConnectorClient>();
+                        if (message.MembersAdded != null && message.MembersAdded.Any())
+                        {
+                            var client = scope.Resolve<IConnectorClient>();
 
-                        var reply = message.CreateReply(message.From.Id + ", " + message.From.Name + ", " + message.Id + ", " + message.Name);
-                        reply.Type = ActivityTypes.Message;
-                        reply.TextFormat = TextFormatTypes.Plain;
-                        reply.InputHint = InputHints.IgnoringInput; //Isso deveria desabilitar o input de texto do user
+                            string membersAdded = string.Join(
+                                ", ",
+                                message.MembersAdded.Select(
+                                    newMember => (newMember.Id != message.Recipient.Id) ? $"{newMember.Name} (Id: {newMember.Id})"
+                                                    : $"{message.Recipient.Name} (Id: {message.Recipient.Id})"));
 
-                        await client.Conversations.ReplyToActivityAsync(reply);
+                            //await context.PostAsync($"Welcome {membersAdded}");
+
+                            //var reply = message.CreateReply(message.From.Id + ", " + message.From.Name + ", " + message.Id + ", " + message.Name);
+                            var reply = message.CreateReply($"Welcome {membersAdded}");
+                            reply.Type = ActivityTypes.Message;
+                            reply.TextFormat = TextFormatTypes.Plain;
+                            reply.InputHint = InputHints.IgnoringInput; //Isso deveria desabilitar o input de texto do user
+
+                            await client.Conversations.ReplyToActivityAsync(reply);
+                        }
                     }
 
                     break;
