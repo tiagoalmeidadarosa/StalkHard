@@ -48,8 +48,7 @@ namespace StalkHard.Dialogs
                 //Verifica se a intent tem um score suficiente para ser usado
                 if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.30) //30%
                 {
-                    string id = "a6661053-41a5-464a-bc4c-166379091881"; //activity.From.Id
-                    var item = await DocumentDBRepository<Login>.GetItemAsync(id);
+                    var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
 
                     var client = new FacebookClient();
                     client.AccessToken = item.AccessTokenFacebook.AccessToken;

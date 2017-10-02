@@ -24,8 +24,7 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
-            string id = "a6661053-41a5-464a-bc4c-166379091881"; //activity.From.Id
-            var item = await DocumentDBRepository<Login>.GetItemAsync(id);
+            var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
 
             List<CardAction> actions = new List<CardAction>();
             List<int> numerosRandom = new List<int>();

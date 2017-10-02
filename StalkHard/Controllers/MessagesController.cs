@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using Microsoft.Bot.Builder.Dialogs.Internals;
 using System.Linq;
 using Autofac;
+using System.Web.SessionState;
+using System.Web;
 
 namespace StalkHard
 {
@@ -80,7 +82,7 @@ namespace StalkHard
                     }*/
 
                     //Testando parâmetro de id de usuário passado para o chatterbot pelo site
-                    using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
+                    /*using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
                     {
                         if (message.MembersAdded != null && message.MembersAdded.Any())
                         {
@@ -95,15 +97,14 @@ namespace StalkHard
                             //await context.PostAsync($"Welcome {membersAdded}");
 
                             //var reply = message.CreateReply(message.From.Id + ", " + message.From.Name + ", " + message.Id + ", " + message.Name);
-                            //var reply = message.CreateReply($"Welcome {membersAdded}");
-                            var reply = message.CreateReply($"{message.Recipient.Name} (Id: {message.Recipient.Id})");
+                            var reply = message.CreateReply($"Welcome {membersAdded}");
                             reply.Type = ActivityTypes.Message;
                             reply.TextFormat = TextFormatTypes.Plain;
                             reply.InputHint = InputHints.IgnoringInput; //Isso deveria desabilitar o input de texto do user
 
                             await client.Conversations.ReplyToActivityAsync(reply);
                         }
-                    }
+                    }*/
 
                     break;
                 case ActivityTypes.ContactRelationUpdate:
