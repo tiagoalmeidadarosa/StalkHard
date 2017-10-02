@@ -95,7 +95,8 @@ namespace StalkHard
                             //await context.PostAsync($"Welcome {membersAdded}");
 
                             //var reply = message.CreateReply(message.From.Id + ", " + message.From.Name + ", " + message.Id + ", " + message.Name);
-                            var reply = message.CreateReply($"Welcome {membersAdded}");
+                            //var reply = message.CreateReply($"Welcome {membersAdded}");
+                            var reply = message.CreateReply($"{message.Recipient.Name} (Id: {message.Recipient.Id})");
                             reply.Type = ActivityTypes.Message;
                             reply.TextFormat = TextFormatTypes.Plain;
                             reply.InputHint = InputHints.IgnoringInput; //Isso deveria desabilitar o input de texto do user
