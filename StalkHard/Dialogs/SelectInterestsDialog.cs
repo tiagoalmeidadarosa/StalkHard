@@ -65,7 +65,7 @@ namespace StalkHard.Dialogs
                 {
                     var intent = responseLUIS.topScoringIntent;
 
-                    if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.40) //40%
+                    if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.30) //30%
                     {
                         activity.Text = intent.intent;
                     }
@@ -132,26 +132,26 @@ namespace StalkHard.Dialogs
                     break;
                 case "EVENTOS":
                 case "EVENTS":
-                    retorno = client.Get("me/events?fields=name,cover");
+                    retorno = client.Get("me/events?fields=name,cover,id");
 
                     foreach (var evento in retorno.data)
                     {
                         List<CardImage> cardImages = new List<CardImage>();
                         cardImages.Add(new CardImage(url: evento.cover.source));
 
-                        /*List<CardAction> cardButtons = new List<CardAction>();
+                        List<CardAction> cardButtons = new List<CardAction>();
                         cardButtons.Add(new CardAction()
                         {
-                            Value = photo.link,
+                            Value = "https://www.facebook.com/events/" + evento.id,
                             Type = "openUrl",
-                            Title = "Link da Foto"
-                        });*/
+                            Title = "Mais Informações"
+                        });
 
                         HeroCard plCard = new HeroCard()
                         {
                             Title = evento.name,
-                            Images = cardImages/*,
-                            Buttons = cardButtons*/
+                            Images = cardImages,
+                            Buttons = cardButtons
                         };
 
                         Attachment attachment = plCard.ToAttachment();
@@ -163,7 +163,7 @@ namespace StalkHard.Dialogs
                 case "MOVIES":
                     //FILMES JÁ ASSISTIDOS:
                     //retorno = client.Get("me/video.watches?fields=data");
-                    retorno = client.Get("me/movies?fields=name,genre,description,link,cover");
+                    retorno = client.Get("me/movies?fields=name,genre,about,description,link,cover");
 
                     foreach (var movie in retorno.data)
                     {
@@ -182,7 +182,7 @@ namespace StalkHard.Dialogs
                         {
                             Title = movie.name,
                             Subtitle = movie.genre,
-                            Text = movie.description,
+                            Text = !string.IsNullOrEmpty(movie.description) ? movie.description : movie.about,
                             Images = cardImages,
                             Buttons = cardButtons
                         };
@@ -225,7 +225,7 @@ namespace StalkHard.Dialogs
                         cardElements.Add(new TextBlock { Text = photo.name, Size = TextSize.Small });
 
                         List<ActionBase> cardActions = new List<ActionBase>();
-                        cardActions.Add(new OpenUrlAction { Url = photo.link, Title = "Link da Foto" });
+                        cardActions.Add(new OpenUrlAction { Url = photo.link, Title = "Mais Informações" });
 
                         AdaptiveCard adaptiveCard = new AdaptiveCard()
                         {
@@ -264,7 +264,7 @@ namespace StalkHard.Dialogs
                     break;
                 case "JOGOS":
                 case "GAMES":
-                    retorno = client.Get("me/games?fields=name,about,link,picture,description");
+                    retorno = client.Get("me/games?fields=name,link,picture,description,category");
 
                     foreach (var game in retorno.data)
                     {
@@ -282,6 +282,7 @@ namespace StalkHard.Dialogs
                         ThumbnailCard plCard = new ThumbnailCard()
                         {
                             Title = game.name,
+                            Subtitle = game.category,
                             Text = game.description,
                             Images = cardImages,
                             Buttons = cardButtons
@@ -296,7 +297,7 @@ namespace StalkHard.Dialogs
                 case "BOOKS":
                     //LIVROS JÁ LIDOS:
                     //retorno = client.Get("me/books.reads?fields=data");
-                    retorno = client.Get("me/books?fields=name,description,link,picture");
+                    retorno = client.Get("me/books?fields=name,description,link,picture,about");
 
                     foreach (var book in retorno.data)
                     {
@@ -314,7 +315,7 @@ namespace StalkHard.Dialogs
                         HeroCard plCard = new HeroCard()
                         {
                             Title = book.name,
-                            Text = book.description,
+                            Text = !string.IsNullOrEmpty(book.description) ? book.description : book.about,
                             //Images = cardImages,
                             Buttons = cardButtons
                         };
@@ -363,7 +364,7 @@ namespace StalkHard.Dialogs
                 case "TELEVISION":
                     //PROGRAMAS DE TV JÁ ASSISTIDOS:
                     //retorno = client.Get("me/video.watches?fields=data");
-                    retorno = client.Get("me/television?fields=name,genre,description,link,cover");
+                    retorno = client.Get("me/television?fields=name,genre,description,link,cover,about");
 
                     foreach (var tv in retorno.data)
                     {
@@ -382,7 +383,7 @@ namespace StalkHard.Dialogs
                         {
                             Title = tv.name,
                             Subtitle = tv.genre,
-                            Text = tv.description,
+                            Text = !string.IsNullOrEmpty(tv.description) ? tv.description : tv.about,
                             Images = cardImages,
                             Buttons = cardButtons
                         };

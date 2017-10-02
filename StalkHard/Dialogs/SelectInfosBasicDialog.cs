@@ -46,7 +46,7 @@ namespace StalkHard.Dialogs
                 dynamic retorno = null;
 
                 //Verifica se a intent tem um score suficiente para ser usado
-                if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.40) //40%
+                if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.30) //30%
                 {
                     string id = "a6661053-41a5-464a-bc4c-166379091881"; //activity.From.Id
                     var item = await DocumentDBRepository<Login>.GetItemAsync(id);
@@ -57,8 +57,10 @@ namespace StalkHard.Dialogs
                     client.AppId = ConfigurationManager.AppSettings["appIdFacebook"];
                     client.AppSecret = ConfigurationManager.AppSettings["appSecretFacebook"];
 
-                    if(intent.intent.Equals("hometown")) //Único caso em que eu preciso de mais de uma propriedade
+                    if(intent.intent.Equals("hometown")) //Casos em que eu preciso de mais de uma propriedade
                         retorno = client.Get("me?fields=" + intent.intent + ",location");
+                    else if(intent.intent.Equals("picture"))
+                        retorno = client.Get("me?fields=" + intent.intent + ",about");
                     else
                         retorno = client.Get("me?fields=" + intent.intent);
 
@@ -73,19 +75,22 @@ namespace StalkHard.Dialogs
                             case "birthday":
                                 string birthday = retorno.birthday;
 
-                                DateTime dataNasc = Convert.ToDateTime(birthday, CultureInfo.CreateSpecificCulture("en-US"));
-                                string format = "dd/MM/yyyy";
-
-                                // Retorna o número de anos
-                                int anos = DateTime.Now.Year - dataNasc.Year;
-
-                                // Se a data de aniversário não ocorreu ainda este ano, subtrair um ano a partir da idade
-                                if (DateTime.Now.Month < dataNasc.Month || (DateTime.Now.Month == dataNasc.Month && DateTime.Now.Day < dataNasc.Day))
+                                if (birthday.Count() == 10)
                                 {
-                                    anos--;
-                                }
+                                    DateTime dataNasc = Convert.ToDateTime(birthday, CultureInfo.CreateSpecificCulture("en-US"));
+                                    string format = "dd/MM/yyyy";
 
-                                response = "Eu nasci em " + dataNasc.ToString(format) + ", tenho " + anos + " anos!";
+                                    // Retorna o número de anos
+                                    int anos = DateTime.Now.Year - dataNasc.Year;
+
+                                    // Se a data de aniversário não ocorreu ainda este ano, subtrair um ano a partir da idade
+                                    if (DateTime.Now.Month < dataNasc.Month || (DateTime.Now.Month == dataNasc.Month && DateTime.Now.Day < dataNasc.Day))
+                                    {
+                                        anos--;
+                                    }
+
+                                    response = "Eu nasci em " + dataNasc.ToString(format) + ", tenho " + anos + " anos!";
+                                }
 
                                 break;
                             case "email":
@@ -161,8 +166,28 @@ namespace StalkHard.Dialogs
 
                                 break;
                             case "picture":
-                                response = "Este sou eu! \U0001F603";
-                                attachments.Add(new Attachment { ContentType = "image/jpg", ContentUrl = retorno.picture.data.url });
+                                if (retorno.Count == 3)
+                                {
+                                    string about = retorno.about;
+
+                                    List<CardImage> cardImages = new List<CardImage>();
+                                    cardImages.Add(new CardImage(url: retorno.picture.data.url));
+
+                                    ThumbnailCard plCard = new ThumbnailCard()
+                                    {
+                                        Title = "Este sou eu! \U0001F603",
+                                        Text = about,
+                                        Images = cardImages,
+                                    };
+
+                                    Attachment attachment = plCard.ToAttachment();
+                                    attachments.Add(attachment);
+                                }
+                                else
+                                {
+                                    response = "Este sou eu! \U0001F603";
+                                    attachments.Add(new Attachment { ContentType = "image/jpg", ContentUrl = retorno.picture.data.url });
+                                }
 
                                 break;
                             case "work":
@@ -184,6 +209,29 @@ namespace StalkHard.Dialogs
                                 }
 
                                 break;
+                            case "political":
+                                response = retorno.political;
+
+                                break;
+                            case "family":
+                                foreach (var family in retorno.family.data)
+                                {
+                                    if (string.IsNullOrEmpty(response))
+                                    {
+                                        response = family.name + " (" + family.relationship + ")";
+                                    }
+                                    else
+                                    {
+                                        response += "\n" + family.name + " (" + family.relationship + ")";
+                                    }
+                                }
+
+                                if (!string.IsNullOrEmpty(response))
+                                {
+                                    response = ("Estes são alguns membros da minha família:\n\n" + response);
+                                }
+
+                                break;
                             default:
                                 response = "Desculpe! Não estou habilitado para falar sobre isso \U0001F614";
 
@@ -197,7 +245,7 @@ namespace StalkHard.Dialogs
                 }
             }
 
-            if(string.IsNullOrEmpty(response))
+            if(string.IsNullOrEmpty(response) && attachments.Count == 0)
             {
                 response = "Minhas pesquisas não retornaram um valor satisfatório, talvez a informação não esteja habilitada pra mim \U0001F615";
             }
