@@ -30,7 +30,10 @@ namespace StalkHard.Dialogs
             List<int> numerosRandom = new List<int>();
             var rand = new Random();
 
-            for (int i = 0; i < 5; i++)
+            //No máximo 5 palavras, ou a quantidade de palavras chave que tiver
+            int qtdKeyPhrases = item.KeyPhrases.Count >= 5 ? 5 : item.KeyPhrases.Count;
+
+            for (int i = 0; i < qtdKeyPhrases; i++)
             {
                 int index = rand.Next(0, item.KeyPhrases.Count);
                 while(numerosRandom.Contains(index))
@@ -42,10 +45,20 @@ namespace StalkHard.Dialogs
 
                 var keyPhrase = item.KeyPhrases.ElementAt(index);
 
-                actions.Add(new CardAction() { Title = keyPhrase.Text, Type = ActionTypes.ImBack, Value = keyPhrase.Text });
+                if(!string.IsNullOrEmpty(keyPhrase.Text))
+                {
+                    actions.Add(new CardAction() { Title = keyPhrase.Text, Type = ActionTypes.ImBack, Value = keyPhrase.Text });
+                }
             }
 
-            var reply = activity.CreateReply("Separei alguns temas, selecione sobre o que você deseja descobrir:");
+            //Validação para ver se foi possível buscar alguma palavra-chave
+            string text = "";
+            if(actions.Count > 0)
+                text = "Separei alguns temas, selecione sobre o que você deseja descobrir:";
+            else
+                text = "Desculpe, não encontrei nenhuma informação, a culpa não é minha! \U0001F623";
+
+            var reply = activity.CreateReply(text);
             reply.Type = ActivityTypes.Message;
             reply.TextFormat = TextFormatTypes.Plain;
 
@@ -57,7 +70,10 @@ namespace StalkHard.Dialogs
             // return our reply to the user
             await context.PostAsync(reply);
 
-            context.Call(new SelectDiscoverSomethingDialog(), this.ResumeAfterSelectDiscoverSomethingDialog);
+            if (actions.Count > 0)
+                context.Call(new SelectDiscoverSomethingDialog(), this.ResumeAfterSelectDiscoverSomethingDialog);
+            else
+                context.Wait(MessageReceivedAsync);
         }
 
         public async Task ResumeAfterSelectDiscoverSomethingDialog(IDialogContext context, IAwaitable<object> result)

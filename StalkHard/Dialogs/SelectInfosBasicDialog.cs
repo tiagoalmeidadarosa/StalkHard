@@ -194,11 +194,25 @@ namespace StalkHard.Dialogs
                                 {
                                     if (string.IsNullOrEmpty(response))
                                     {
-                                        response += work.position.name + " - " + work.employer.name;
+                                        if(string.IsNullOrEmpty(work.position))
+                                        {
+                                            response += work.employer.name;
+                                        }
+                                        else
+                                        {
+                                            response += work.position.name + " - " + work.employer.name;
+                                        }
                                     }
                                     else
                                     {
-                                        response += "\n" + work.position.name + " - " + work.employer.name;
+                                        if (string.IsNullOrEmpty(work.position))
+                                        {
+                                            response += "\n" + work.employer.name;
+                                        }
+                                        else
+                                        {
+                                            response += "\n" + work.position.name + " - " + work.employer.name;
+                                        }
                                     }
                                 }
 
