@@ -99,15 +99,18 @@ namespace StalkHard.Dialogs
 
                     retorno = client.Get("me?fields=favorite_athletes");
 
-                    foreach (var athlete in retorno.favorite_athletes)
+                    if (retorno.Count > 1)
                     {
-                        HeroCard plCard = new HeroCard()
+                        foreach (var athlete in retorno.favorite_athletes)
                         {
-                            Title = athlete.name
-                        };
+                            HeroCard plCard = new HeroCard()
+                            {
+                                Title = athlete.name
+                            };
 
-                        Attachment attachment = plCard.ToAttachment();
-                        reply.Attachments.Add(attachment);
+                            Attachment attachment = plCard.ToAttachment();
+                            reply.Attachments.Add(attachment);
+                        }
                     }
 
                     break;
@@ -117,15 +120,18 @@ namespace StalkHard.Dialogs
 
                     retorno = client.Get("me?fields=sports");
 
-                    foreach (var sport in retorno.sports)
+                    if (retorno.Count > 1)
                     {
-                        HeroCard plCard = new HeroCard()
+                        foreach (var sport in retorno.sports)
                         {
-                            Title = sport.name
-                        };
+                            HeroCard plCard = new HeroCard()
+                            {
+                                Title = sport.name
+                            };
 
-                        Attachment attachment = plCard.ToAttachment();
-                        reply.Attachments.Add(attachment);
+                            Attachment attachment = plCard.ToAttachment();
+                            reply.Attachments.Add(attachment);
+                        }
                     }
 
                     break;
@@ -368,8 +374,15 @@ namespace StalkHard.Dialogs
                     foreach (var tv in retorno.data)
                     {
                         List<CardImage> cardImages = new List<CardImage>();
-                        cardImages.Add(new CardImage(url: tv.cover.source));
-
+                        try
+                        {
+                            if (tv.cover.Count > 0)
+                            {
+                                cardImages.Add(new CardImage(url: tv.cover.source));
+                            }
+                        }
+                        catch (Exception ex) { }
+                        
                         List<CardAction> cardButtons = new List<CardAction>();
                         cardButtons.Add(new CardAction()
                         {
@@ -398,15 +411,18 @@ namespace StalkHard.Dialogs
 
                     retorno = client.Get("me?fields=favorite_teams");
 
-                    foreach (var team in retorno.favorite_teams)
+                    if (retorno.Count > 1)
                     {
-                        HeroCard plCard = new HeroCard()
+                        foreach (var team in retorno.favorite_teams)
                         {
-                            Title = team.name
-                        };
+                            HeroCard plCard = new HeroCard()
+                            {
+                                Title = team.name
+                            };
 
-                        Attachment attachment = plCard.ToAttachment();
-                        reply.Attachments.Add(attachment);
+                            Attachment attachment = plCard.ToAttachment();
+                            reply.Attachments.Add(attachment);
+                        }
                     }
 
                     break;
