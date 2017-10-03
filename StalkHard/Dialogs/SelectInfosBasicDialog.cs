@@ -192,26 +192,36 @@ namespace StalkHard.Dialogs
                             case "work":
                                 foreach (var work in retorno.work)
                                 {
+                                    string position = "";
+                                    try
+                                    {
+                                        if (work.position.Count > 0)
+                                        {
+                                            position = work.position.name;
+                                        }
+                                    }
+                                    catch(Exception ex) {}
+
                                     if (string.IsNullOrEmpty(response))
                                     {
-                                        if(string.IsNullOrEmpty(work.position))
+                                        if(string.IsNullOrEmpty(position))
                                         {
                                             response += work.employer.name;
                                         }
                                         else
                                         {
-                                            response += work.position.name + " - " + work.employer.name;
+                                            response += position + " - " + work.employer.name;
                                         }
                                     }
                                     else
                                     {
-                                        if (string.IsNullOrEmpty(work.position))
+                                        if (string.IsNullOrEmpty(position))
                                         {
                                             response += "\n" + work.employer.name;
                                         }
                                         else
                                         {
-                                            response += "\n" + work.position.name + " - " + work.employer.name;
+                                            response += "\n" + position + " - " + work.employer.name;
                                         }
                                     }
                                 }
