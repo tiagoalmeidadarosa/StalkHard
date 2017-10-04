@@ -142,7 +142,11 @@ namespace StalkHard.Dialogs
                     foreach (var evento in retorno.data)
                     {
                         List<CardImage> cardImages = new List<CardImage>();
-                        cardImages.Add(new CardImage(url: evento.cover.source));
+                        try
+                        {
+                            cardImages.Add(new CardImage(url: evento.cover.source));
+                        }
+                        catch (Exception ex) { }
 
                         List<CardAction> cardButtons = new List<CardAction>();
                         cardButtons.Add(new CardAction()
@@ -173,7 +177,11 @@ namespace StalkHard.Dialogs
                     foreach (var movie in retorno.data)
                     {
                         List<CardImage> cardImages = new List<CardImage>();
-                        cardImages.Add(new CardImage(url: movie.cover.source));
+                        try
+                        {
+                            cardImages.Add(new CardImage(url: movie.cover.source));
+                        }
+                        catch (Exception ex) { }
 
                         List<CardAction> cardButtons = new List<CardAction>();
                         cardButtons.Add(new CardAction()
@@ -199,7 +207,7 @@ namespace StalkHard.Dialogs
                     break;
                 case "FOTOS":
                 case "PHOTOS":
-                    retorno = client.Get("me/photos?fields=name,picture,link,webp_images");
+                    retorno = client.Get("me/photos?fields=name,link,webp_images");
 
                     foreach (var photo in retorno.data)
                     {
@@ -253,7 +261,11 @@ namespace StalkHard.Dialogs
                     foreach (var like in retorno.data)
                     {
                         List<CardImage> cardImages = new List<CardImage>();
-                        cardImages.Add(new CardImage(url: like.picture.data.url));
+                        try
+                        {
+                            cardImages.Add(new CardImage(url: like.picture.data.url));
+                        }
+                        catch (Exception ex) { }
 
                         ThumbnailCard plCard = new ThumbnailCard()
                         {
@@ -274,7 +286,11 @@ namespace StalkHard.Dialogs
                     foreach (var game in retorno.data)
                     {
                         List<CardImage> cardImages = new List<CardImage>();
-                        cardImages.Add(new CardImage(url: game.picture.data.url));
+                        try
+                        {
+                            cardImages.Add(new CardImage(url: game.picture.data.url));
+                        }
+                        catch (Exception ex) { }
 
                         List<CardAction> cardButtons = new List<CardAction>();
                         cardButtons.Add(new CardAction()
@@ -340,7 +356,11 @@ namespace StalkHard.Dialogs
                     foreach (var music in retorno.data)
                     {
                         List<CardImage> cardImages = new List<CardImage>();
-                        cardImages.Add(new CardImage(url: music.picture.data.url));
+                        try
+                        {
+                            cardImages.Add(new CardImage(url: music.picture.data.url));
+                        }
+                        catch (Exception ex) { }
 
                         List<CardAction> cardButtons = new List<CardAction>();
                         cardButtons.Add(new CardAction()

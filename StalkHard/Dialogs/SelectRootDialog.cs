@@ -8,6 +8,8 @@ using System.Threading;
 using Facebook;
 using System.Configuration;
 using System.Collections.Generic;
+using Microsoft.Bot.Builder.Dialogs.Internals;
+using Autofac;
 
 namespace StalkHard.Dialogs
 {
@@ -35,14 +37,38 @@ namespace StalkHard.Dialogs
                 //Chama métodos da api do Facebook, para buscar os principais interesses
                 await context.Forward(new InterestsDialog(), this.ResumeAfterInterestsDialog, activity, CancellationToken.None);
             }
-            else
+            else if (activity.Text.ToUpper().Equals("INFORMAÇÕES BÁSICAS"))
             {
-                //INFORMAÇÕES BÁSICAS ou qualquer outra coisa
                 //Faz chamadas a API LUIS (Language Understanding Intelligent Service) para entender o que é solicitado
                 await context.Forward(new InfosBasicDialog(), this.ResumeAfterInfosBasicDialog, activity, CancellationToken.None);
             }
+            else
+            {
+                //Qualquer outra coisa
+                using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, activity))
+                {
+                    var client = scope.Resolve<IConnectorClient>();
 
-            //context.Wait(this.MessageReceivedAsync);
+                    var reply = activity.CreateReply("Inicialmente você deve escolher um caminho para as buscas, escolha uma das três opções abaixo:");
+                    reply.Type = ActivityTypes.Message;
+                    reply.TextFormat = TextFormatTypes.Plain;
+                    reply.InputHint = InputHints.IgnoringInput; //Isso deveria desabilitar o input de texto do user
+                    reply.AttachmentLayout = AttachmentLayoutTypes.List;
+
+                    reply.SuggestedActions = new SuggestedActions()
+                    {
+                        Actions = new List<CardAction>()
+                        {
+                            new CardAction(){ Title = "Descobrir Algo", Type=ActionTypes.ImBack, Value="Descobrir Algo" },
+                            new CardAction(){ Title = "Informações Básicas", Type=ActionTypes.ImBack, Value="Informações Básicas" },
+                            new CardAction(){ Title = "Interesses", Type=ActionTypes.ImBack, Value="Interesses" }
+                        }
+                    };
+
+                    await client.Conversations.ReplyToActivityAsync(reply);
+                    context.Wait(this.MessageReceivedAsync);
+                }                
+            }
         }
 
         public async Task ResumeAfterDiscoverSomethingDialog(IDialogContext context, IAwaitable<object> result)
