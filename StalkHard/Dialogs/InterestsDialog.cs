@@ -27,7 +27,7 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
-            var reply = activity.CreateReply("Veja sobre o que você pode descobrir e escolha um tema:");
+            var reply = activity.CreateReply("Veja sobre o que você pode descobrir e escolha um tema:\n(Fique à vontade também para me fazer perguntas abertas sobre cada tema)");
             reply.Type = ActivityTypes.Message;
             reply.TextFormat = TextFormatTypes.Plain;
 

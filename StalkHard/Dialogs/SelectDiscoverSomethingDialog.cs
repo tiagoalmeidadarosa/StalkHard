@@ -30,10 +30,10 @@ namespace StalkHard.Dialogs
 
             var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
 
-            if(item.KeyPhrases.Count(k => k.Text.Equals(activity.Text)) > 0)
+            if(item.KeyPhrases.Count(k => k.Text.ToUpper().Contains(activity.Text.ToUpper())) > 0)
             {
                 var rand = new Random();
-                var keyPhrase = item.KeyPhrases.First(k => k.Text.Equals(activity.Text));
+                var keyPhrase = item.KeyPhrases.First(k => k.Text.ToUpper().Contains(activity.Text.ToUpper()));
 
                 string idTweet = keyPhrase.References.ElementAt(rand.Next(keyPhrase.References.Count())).IdTweet;
 
