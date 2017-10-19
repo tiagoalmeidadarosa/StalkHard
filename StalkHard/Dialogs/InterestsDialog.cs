@@ -44,6 +44,7 @@ namespace StalkHard.Dialogs
                     new CardAction(){ Title = "Gostos", Type=ActionTypes.ImBack, Value="Gostos" },
                     new CardAction(){ Title = "Jogos", Type=ActionTypes.ImBack, Value="Jogos" },
                     new CardAction(){ Title = "Livros", Type=ActionTypes.ImBack, Value="Livros" },
+                    new CardAction(){ Title = "Lugares", Type=ActionTypes.ImBack, Value="Lugares" },
                     new CardAction(){ Title = "Músicas", Type=ActionTypes.ImBack, Value="Músicas" },
                     new CardAction(){ Title = "Televisão", Type=ActionTypes.ImBack, Value="Televisão" },
                     new CardAction(){ Title = "Times", Type=ActionTypes.ImBack, Value="Times" },

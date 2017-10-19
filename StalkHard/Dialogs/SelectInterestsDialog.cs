@@ -13,6 +13,8 @@ using System.Web.Script.Serialization;
 using Facebook;
 using System.Configuration;
 using AdaptiveCards;
+using Microsoft.Bot.Builder.Location;
+using Microsoft.Bot.Builder.Location.Bing;
 
 namespace StalkHard.Dialogs
 {
@@ -485,6 +487,64 @@ namespace StalkHard.Dialogs
                         Attachment attachment = plCard.ToAttachment();
                         reply.Attachments.Add(attachment);
                     }
+
+                    break;
+                case "LUGARES":
+                case "PLACES":
+                    /*retorno = client.Get("me/tagged_places?fields=name,place");
+
+                    foreach (var place in retorno.data)
+                    {
+                        var apiKey = ConfigurationManager.AppSettings["BingMapsApiKey"];
+                        LocationResourceManager locationResourceManager = new LocationResourceManager();
+
+                        LocationCardBuilder plCard = new LocationCardBuilder(apiKey, locationResourceManager);
+
+                        List<Location> locations = new List<Location>();
+
+                        Location location = new Location();
+                        GeocodePoint geocodePoint = new GeocodePoint();
+                        geocodePoint.Coordinates = new List<double>();
+                        geocodePoint.Coordinates.Add(-30.021288396881);
+                        geocodePoint.Coordinates.Add(-51.163018242745);
+                        location.GeocodePoints = new List<GeocodePoint>();
+                        location.GeocodePoints.Add(geocodePoint);
+
+                        locations.Add(location);
+
+                        List<string> names = new List<string>();
+                        names.Add("tst");
+                        
+                        foreach(var heroCard in plCard.CreateHeroCards(locations, true, names))
+                        {
+                            Attachment attachment = heroCard.ToAttachment();
+                            reply.Attachments.Add(attachment);
+                        }
+                    }*/
+
+                    /*var buttons = new List<CardAction>();
+
+                    LocationResourceManager locationResourceManager = new LocationResourceManager();
+                    var branches = new string[] { locationResourceManager.FavoriteLocations, locationResourceManager.OtherLocation };
+
+                    foreach (var possibleBranch in branches)
+                    {
+                        buttons.Add(new CardAction
+                        {
+                            Type = "imBack",
+                            Title = possibleBranch,
+                            Value = possibleBranch
+                        });
+                    }
+
+                    var heroCard = new HeroCard
+                    {
+                        Subtitle = locationResourceManager.DialogStartBranchAsk,
+                        Buttons = buttons
+                    };
+
+                    reply.Attachments = new List<Attachment> { heroCard.ToAttachment() };
+                    reply.AttachmentLayout = AttachmentLayoutTypes.Carousel;*/
 
                     break;
             }
