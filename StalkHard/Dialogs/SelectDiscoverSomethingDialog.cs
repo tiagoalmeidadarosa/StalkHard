@@ -28,50 +28,57 @@ namespace StalkHard.Dialogs
             string textReply = "";
             var activity = await result as Activity;
 
-            var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
-
-            if(item.KeyPhrases.Count(k => k.Text.ToUpper().Contains(activity.Text.ToUpper())) > 0)
+            if (activity.Text != null)
             {
-                var rand = new Random();
-                var keyPhrase = item.KeyPhrases.First(k => k.Text.ToUpper().Contains(activity.Text.ToUpper()));
+                var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
 
-                string idTweet = keyPhrase.References.ElementAt(rand.Next(keyPhrase.References.Count())).IdTweet;
-
-                // Retorna o tweet que se refere ao sentimento selecionado
-                var tweetFormat = "https://api.twitter.com/1.1/statuses/show.json?id={0}";
-                var tweetUrl = string.Format(tweetFormat, idTweet);
-
-                HttpWebRequest tweetRequest = (HttpWebRequest)WebRequest.Create(tweetUrl);
-                var tweetHeaderFormat = "{0} {1}";
-                tweetRequest.Headers.Add("Authorization", string.Format(tweetHeaderFormat, item.AccessTokenTwitter.TokenType, item.AccessTokenTwitter.AccessToken));
-                tweetRequest.Method = "Get";
-                WebResponse tweetResponse = tweetRequest.GetResponse();
-                var tweetJson = string.Empty;
-                dynamic tweet = null;
-                using (tweetResponse)
+                if (item.KeyPhrases.Count(k => k.Text.ToUpper().Contains(activity.Text.ToUpper())) > 0)
                 {
-                    using (var reader = new StreamReader(tweetResponse.GetResponseStream()))
+                    var rand = new Random();
+                    var keyPhrase = item.KeyPhrases.First(k => k.Text.ToUpper().Contains(activity.Text.ToUpper()));
+
+                    string idTweet = keyPhrase.References.ElementAt(rand.Next(keyPhrase.References.Count())).IdTweet;
+
+                    // Retorna o tweet que se refere ao sentimento selecionado
+                    var tweetFormat = "https://api.twitter.com/1.1/statuses/show.json?id={0}";
+                    var tweetUrl = string.Format(tweetFormat, idTweet);
+
+                    HttpWebRequest tweetRequest = (HttpWebRequest)WebRequest.Create(tweetUrl);
+                    var tweetHeaderFormat = "{0} {1}";
+                    tweetRequest.Headers.Add("Authorization", string.Format(tweetHeaderFormat, item.AccessTokenTwitter.TokenType, item.AccessTokenTwitter.AccessToken));
+                    tweetRequest.Method = "Get";
+                    WebResponse tweetResponse = tweetRequest.GetResponse();
+                    var tweetJson = string.Empty;
+                    dynamic tweet = null;
+                    using (tweetResponse)
                     {
-                        tweetJson = reader.ReadToEnd();
+                        using (var reader = new StreamReader(tweetResponse.GetResponseStream()))
+                        {
+                            tweetJson = reader.ReadToEnd();
+                        }
+
+                        tweet = new JavaScriptSerializer().DeserializeObject(tweetJson);
                     }
 
-                    tweet = new JavaScriptSerializer().DeserializeObject(tweetJson);
-                }
-
-                string[] defaultMessages = { "\"{0}\"",
+                    string[] defaultMessages = { "\"{0}\"",
                                              "Em relação a isso, eu posso dizer que: \"{0}\"",
                                              "Posso me referir a " + activity.Text + " dizendo que: \"{0}\"" };
 
-                textReply = "Ocorreu algum problema ao retornar o texto relacionado a este sentimento \U0001F621";
-                if (tweet != null && !string.IsNullOrEmpty(tweet["text"]))
+                    textReply = "Ocorreu algum problema ao retornar o texto relacionado a este sentimento \U0001F621";
+                    if (tweet != null && !string.IsNullOrEmpty(tweet["text"]))
+                    {
+                        //Pegar uma mensagem aleatória para que a resposta não seja sempre a mesma
+                        textReply = string.Format(defaultMessages[rand.Next(defaultMessages.Count())], tweet["text"]);
+                    }
+                }
+                else
                 {
-                    //Pegar uma mensagem aleatória para que a resposta não seja sempre a mesma
-                    textReply = string.Format(defaultMessages[rand.Next(defaultMessages.Count())], tweet["text"]);
+                    textReply = "Desculpe, eu não encontrei nada relacionado a sua solicitação \U0001F61E";
                 }
             }
             else
             {
-                textReply = "Desculpe, eu não encontrei nada relacionado a sua solicitação \U0001F61E";
+                textReply = "Não estou capacitado para entender este tipo de solicitação, desculpe! \U0001F61E";
             }
 
             var reply = activity.CreateReply(textReply);

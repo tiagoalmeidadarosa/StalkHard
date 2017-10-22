@@ -139,11 +139,18 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="GlobalMessageHandlersBotModule.cs" />
+    <Compile Include="Models\Adress.cs" />
     <Compile Include="Models\Entity.cs" />
+    <Compile Include="Models\GeocodePoint.cs" />
+    <Compile Include="Models\IBingGeoSpatialService.cs" />
     <Compile Include="Models\Intent.cs" />
+    <Compile Include="Models\Location.cs" />
+    <Compile Include="Models\LocationApiResponse.cs" />
+    <Compile Include="Models\LocationSet.cs" />
     <Compile Include="Models\Login.cs" />
     <Compile Include="Models\Utterance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\BingGeoSpatialService.cs" />
     <Compile Include="Services\DocumentDBRepository.cs" />
     <Compile Include="Services\Luis.cs" />
   </ItemGroup>

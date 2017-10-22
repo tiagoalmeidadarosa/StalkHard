@@ -25,26 +25,43 @@ namespace StalkHard.Dialogs
 
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
         {
+            var entrou = true;
             var activity = await result as Activity;
 
-            if(activity.Text.ToUpper().Equals("DESCOBRIR ALGO"))
+            if (activity.Text != null)
             {
-                //Análise a partir dos tweets, na busca de sentimentos
-                await context.Forward(new DiscoverSomethingDialog(), this.ResumeAfterDiscoverSomethingDialog, activity, CancellationToken.None);
-            }
-            else if (activity.Text.ToUpper().Equals("INTERESSES"))
-            {
-                //Chama métodos da api do Facebook, para buscar os principais interesses
-                await context.Forward(new InterestsDialog(), this.ResumeAfterInterestsDialog, activity, CancellationToken.None);
-            }
-            else if (activity.Text.ToUpper().Equals("INFORMAÇÕES BÁSICAS"))
-            {
-                //Faz chamadas a API LUIS (Language Understanding Intelligent Service) para entender o que é solicitado
-                await context.Forward(new InfosBasicDialog(), this.ResumeAfterInfosBasicDialog, activity, CancellationToken.None);
+                //switch case aqui e colocar o 
+                switch(activity.Text.ToUpper())
+                {
+                    case "DESCOBRIR ALGO":
+                        //Análise a partir dos tweets, na busca de sentimentos
+                        await context.Forward(new DiscoverSomethingDialog(), this.ResumeAfterDiscoverSomethingDialog, activity, CancellationToken.None);
+
+                        break;
+                    case "INTERESSES":
+                        //Chama métodos da api do Facebook, para buscar os principais interesses
+                        await context.Forward(new InterestsDialog(), this.ResumeAfterInterestsDialog, activity, CancellationToken.None);
+
+                        break;
+                    case "INFORMAÇÕES BÁSICAS":
+                        //Faz chamadas a API LUIS (Language Understanding Intelligent Service) para entender o que é solicitado
+                        await context.Forward(new InfosBasicDialog(), this.ResumeAfterInfosBasicDialog, activity, CancellationToken.None);
+
+                        break;
+                    default:
+                        entrou = false;
+
+                        break;
+                }
             }
             else
             {
-                //Qualquer outra coisa
+                entrou = false;
+            }
+
+            //Qualquer outra coisa
+            if (!entrou)
+            {
                 using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, activity))
                 {
                     var client = scope.Resolve<IConnectorClient>();
@@ -58,16 +75,16 @@ namespace StalkHard.Dialogs
                     reply.SuggestedActions = new SuggestedActions()
                     {
                         Actions = new List<CardAction>()
-                        {
-                            new CardAction(){ Title = "Descobrir Algo", Type=ActionTypes.ImBack, Value="Descobrir Algo" },
-                            new CardAction(){ Title = "Informações Básicas", Type=ActionTypes.ImBack, Value="Informações Básicas" },
-                            new CardAction(){ Title = "Interesses", Type=ActionTypes.ImBack, Value="Interesses" }
-                        }
+                            {
+                                new CardAction(){ Title = "Descobrir Algo", Type=ActionTypes.ImBack, Value="Descobrir Algo" },
+                                new CardAction(){ Title = "Informações Básicas", Type=ActionTypes.ImBack, Value="Informações Básicas" },
+                                new CardAction(){ Title = "Interesses", Type=ActionTypes.ImBack, Value="Interesses" }
+                            }
                     };
 
                     await client.Conversations.ReplyToActivityAsync(reply);
                     context.Wait(this.MessageReceivedAsync);
-                }                
+                }
             }
         }
 
