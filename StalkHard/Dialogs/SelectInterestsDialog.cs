@@ -510,6 +510,33 @@ namespace StalkHard.Dialogs
                             location.Point = geocodePoint;
                             location.Name = place.place.name;
 
+                            try
+                            {
+                                string endereco = "";
+                                if (!string.IsNullOrEmpty(place.place.location.street))
+                                    endereco = place.place.location.street;
+
+                                if (!string.IsNullOrEmpty(place.place.location.city) && !string.IsNullOrEmpty(place.place.location.state))
+                                {
+                                    if(string.IsNullOrEmpty(endereco))
+                                        endereco += place.place.location.city + "/" + place.place.location.state;
+                                    else
+                                        endereco += " - " + place.place.location.city + "/" + place.place.location.state;
+                                }
+
+                                if (!string.IsNullOrEmpty(place.place.location.country))
+                                {
+                                    if (string.IsNullOrEmpty(endereco))
+                                        endereco += place.place.location.country;
+                                    else
+                                        endereco += " - " + place.place.location.country;
+                                }
+
+                                if (!string.IsNullOrEmpty(endereco))
+                                    location.Name += " (" + endereco + ")";
+                            }
+                            catch (Exception ex) { }
+
                             locations.Add(location);
                         }
 
@@ -550,7 +577,6 @@ namespace StalkHard.Dialogs
                 reply.Text = "Desculpe! Eu não encontrei nada sobre isso ou não estou capacitado para entender esse tipo de solicitação \U0001F61E";
             }
 
-            //context.Done(reply);
             await context.PostAsync(reply);
             context.Wait(this.MessageReceivedAsync);
         }
