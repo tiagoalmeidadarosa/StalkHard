@@ -68,7 +68,7 @@ namespace StalkHard.Dialogs
                     {
                         var intent = responseLUIS.topScoringIntent;
 
-                        if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.30) //30%
+                        if (!string.IsNullOrEmpty(intent.intent) && intent.intent.ToUpper() != "NONE" && intent.score >= 0.30) //30%
                         {
                             activity.Text = intent.intent;
                         }

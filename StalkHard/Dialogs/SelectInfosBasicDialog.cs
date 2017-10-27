@@ -39,7 +39,6 @@ namespace StalkHard.Dialogs
                 //Call API LUIS (Language Understanding Intelligent Service)
                 var responseLUIS = await Luis.GetResponse(activity);
 
-                //Trata resposta (DEVE SER CRIADO EM UM OUTRO MÉTODO)
                 if (responseLUIS != null)
                 {
                     //Intenção com a melhor pontuação
@@ -48,7 +47,7 @@ namespace StalkHard.Dialogs
                     dynamic retorno = null;
 
                     //Verifica se a intent tem um score suficiente para ser usado
-                    if (!string.IsNullOrEmpty(intent.intent) && intent.score >= 0.30) //30%
+                    if (!string.IsNullOrEmpty(intent.intent) && intent.intent.ToUpper() != "NONE" && intent.score >= 0.30) //30%
                     {
                         var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
 
