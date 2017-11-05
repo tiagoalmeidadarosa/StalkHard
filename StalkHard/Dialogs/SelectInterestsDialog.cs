@@ -42,7 +42,13 @@ namespace StalkHard.Dialogs
             reply.AttachmentLayout = AttachmentLayoutTypes.Carousel;
             reply.Attachments = new List<Attachment>();
 
-            var item = Session.Instance.UserLogin;
+            string appId = ConfigurationManager.AppSettings["MicrosoftAppId"];
+            string appPass = ConfigurationManager.AppSettings["MicrosoftAppPassword"];
+            //StateClient stateClient = new StateClient(new MicrosoftAppCredentials(appId, appPass));
+            StateClient stateClient = activity.GetStateClient();
+            BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
+
+            var item = userData.GetProperty<Login>("UserData");
 
             if (item != null)
             {

@@ -7,6 +7,7 @@ using StalkHard.Models;
 using System.Threading;
 using System.Collections.Generic;
 using System.Linq;
+using System.Configuration;
 
 namespace StalkHard.Dialogs
 {
@@ -24,7 +25,13 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
-            var item = Session.Instance.UserLogin;
+            string appId = ConfigurationManager.AppSettings["MicrosoftAppId"];
+            string appPass = ConfigurationManager.AppSettings["MicrosoftAppPassword"];
+            //StateClient stateClient = new StateClient(new MicrosoftAppCredentials(appId, appPass));
+            StateClient stateClient = activity.GetStateClient();
+            BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
+
+            var item = userData.GetProperty<Login>("UserData");
 
             List<CardAction> actions = new List<CardAction>();
             List<int> numerosRandom = new List<int>();

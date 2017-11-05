@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.IO;
 using System.Web.Script.Serialization;
+using System.Configuration;
 
 namespace StalkHard.Dialogs
 {
@@ -30,7 +31,13 @@ namespace StalkHard.Dialogs
 
             if (activity.Text != null)
             {
-                var item = Session.Instance.UserLogin;
+                string appId = ConfigurationManager.AppSettings["MicrosoftAppId"];
+                string appPass = ConfigurationManager.AppSettings["MicrosoftAppPassword"];
+                //StateClient stateClient = new StateClient(new MicrosoftAppCredentials(appId, appPass));
+                StateClient stateClient = activity.GetStateClient();
+                BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
+
+                var item = userData.GetProperty<Login>("UserData");
 
                 if (item != null && item.KeyPhrases.Count(k => k.Text.ToUpper().Contains(activity.Text.ToUpper())) > 0)
                 {
