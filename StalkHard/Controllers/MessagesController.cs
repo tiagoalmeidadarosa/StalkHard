@@ -53,7 +53,7 @@ namespace StalkHard
                     // Not available in all channels
 
                     //Salvo objeto do usuário em uma sessão, para não precisar ficar fazendo várias chamadas ao banco
-                    if (message.MembersAdded != null && message.MembersAdded.Any())
+                    /*if (message.MembersAdded != null && message.MembersAdded.Any())
                     {
                         foreach (var newMember in message.MembersAdded)
                         {
@@ -71,7 +71,18 @@ namespace StalkHard
                                 await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
                             }
                         }
-                    }
+                    }*/
+
+                    Login userLogin = await DocumentDBRepository<Login>.GetItemAsync(message.From.Id);
+
+                    string appId = ConfigurationManager.AppSettings["MicrosoftAppId"];
+                    string appPass = ConfigurationManager.AppSettings["MicrosoftAppPassword"];
+                    //StateClient stateClient = message.GetStateClient();
+                    StateClient stateClient = new StateClient(new MicrosoftAppCredentials(appId, appPass));
+
+                    BotData userData = await stateClient.BotState.GetUserDataAsync(message.ChannelId, message.From.Id);
+                    userData.SetProperty<Login>("UserData", userLogin);
+                    await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
 
                     /*using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
                     {
