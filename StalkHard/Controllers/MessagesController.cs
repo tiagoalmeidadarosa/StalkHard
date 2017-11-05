@@ -59,13 +59,12 @@ namespace StalkHard
                         {
                             if (newMember.Id != message.Recipient.Id)
                             {
-                                //Login userLogin = await DocumentDBRepository<Login>.GetItemAsync(message.From.Id);
-                                Login userLogin = await DocumentDBRepository<Login>.GetItemAsync("63d0ad31-9f0f-41f6-8498-5962b155af57");
+                                Login userLogin = await DocumentDBRepository<Login>.GetItemAsync(message.From.Id);
 
                                 string appId = ConfigurationManager.AppSettings["MicrosoftAppId"];
                                 string appPass = ConfigurationManager.AppSettings["MicrosoftAppPassword"];
-                                StateClient stateClient = message.GetStateClient();
-                                //StateClient stateClient = new StateClient(new MicrosoftAppCredentials(appId, appPass));
+                                //StateClient stateClient = message.GetStateClient();
+                                StateClient stateClient = new StateClient(new MicrosoftAppCredentials(appId, appPass));
 
                                 BotData userData = await stateClient.BotState.GetUserDataAsync(message.ChannelId, message.From.Id);
                                 userData.SetProperty<Login>("UserData", userLogin);
