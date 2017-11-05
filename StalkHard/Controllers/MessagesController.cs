@@ -73,17 +73,6 @@ namespace StalkHard
                         }
                     }*/
 
-                    Login userLogin = await DocumentDBRepository<Login>.GetItemAsync(message.From.Id);
-
-                    string appId = ConfigurationManager.AppSettings["MicrosoftAppId"];
-                    string appPass = ConfigurationManager.AppSettings["MicrosoftAppPassword"];
-                    //StateClient stateClient = message.GetStateClient();
-                    StateClient stateClient = new StateClient(new MicrosoftAppCredentials(appId, appPass));
-
-                    BotData userData = await stateClient.BotState.GetUserDataAsync(message.ChannelId, message.From.Id);
-                    userData.SetProperty<Login>("UserData", userLogin);
-                    await stateClient.BotState.SetUserDataAsync(message.ChannelId, message.From.Id, userData);
-
                     /*using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
                     {
                         var client = scope.Resolve<IConnectorClient>();

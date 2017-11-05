@@ -31,13 +31,7 @@ namespace StalkHard.Dialogs
 
             if (activity.Text != null)
             {
-                string appId = ConfigurationManager.AppSettings["MicrosoftAppId"];
-                string appPass = ConfigurationManager.AppSettings["MicrosoftAppPassword"];
-                StateClient stateClient = new StateClient(new MicrosoftAppCredentials(appId, appPass));
-                //StateClient stateClient = activity.GetStateClient();
-                BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
-
-                var item = userData.GetProperty<Login>("UserData");
+                var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
 
                 if (item != null && item.KeyPhrases.Count(k => k.Text.ToUpper().Contains(activity.Text.ToUpper())) > 0)
                 {

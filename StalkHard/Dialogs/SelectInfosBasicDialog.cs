@@ -49,13 +49,7 @@ namespace StalkHard.Dialogs
                     //Verifica se a intent tem um score suficiente para ser usado
                     if (!string.IsNullOrEmpty(intent.intent) && intent.intent.ToUpper() != "NONE" && intent.score >= 0.30) //30%
                     {
-                        string appId = ConfigurationManager.AppSettings["MicrosoftAppId"];
-                        string appPass = ConfigurationManager.AppSettings["MicrosoftAppPassword"];
-                        StateClient stateClient = new StateClient(new MicrosoftAppCredentials(appId, appPass));
-                        //StateClient stateClient = activity.GetStateClient();
-                        BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
-
-                        var item = userData.GetProperty<Login>("UserData");
+                        var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
 
                         if (item != null)
                         {

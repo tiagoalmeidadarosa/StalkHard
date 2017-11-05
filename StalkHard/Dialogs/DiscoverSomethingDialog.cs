@@ -25,13 +25,7 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
-            string appId = ConfigurationManager.AppSettings["MicrosoftAppId"];
-            string appPass = ConfigurationManager.AppSettings["MicrosoftAppPassword"];
-            StateClient stateClient = new StateClient(new MicrosoftAppCredentials(appId, appPass));
-            //StateClient stateClient = activity.GetStateClient();
-            BotData userData = await stateClient.BotState.GetUserDataAsync(activity.ChannelId, activity.From.Id);
-
-            var item = userData.GetProperty<Login>("UserData");
+            var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
 
             List<CardAction> actions = new List<CardAction>();
             List<int> numerosRandom = new List<int>();
