@@ -24,30 +24,33 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
-            var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
+            var item = Session.Instance.UserLogin;
 
             List<CardAction> actions = new List<CardAction>();
             List<int> numerosRandom = new List<int>();
             var rand = new Random();
 
-            //No máximo 5 palavras, ou a quantidade de palavras chave que tiver
-            int qtdKeyPhrases = item.KeyPhrases.Count >= 5 ? 5 : item.KeyPhrases.Count;
-
-            for (int i = 0; i < qtdKeyPhrases; i++)
+            if (item != null)
             {
-                int index = rand.Next(0, item.KeyPhrases.Count);
-                while(numerosRandom.Contains(index))
+                //No máximo 5 palavras, ou a quantidade de palavras chave que tiver
+                int qtdKeyPhrases = item.KeyPhrases.Count >= 5 ? 5 : item.KeyPhrases.Count;
+
+                for (int i = 0; i < qtdKeyPhrases; i++)
                 {
-                    index = rand.Next(0, item.KeyPhrases.Count);
-                }
+                    int index = rand.Next(0, item.KeyPhrases.Count);
+                    while (numerosRandom.Contains(index))
+                    {
+                        index = rand.Next(0, item.KeyPhrases.Count);
+                    }
 
-                numerosRandom.Add(index);
+                    numerosRandom.Add(index);
 
-                var keyPhrase = item.KeyPhrases.ElementAt(index);
+                    var keyPhrase = item.KeyPhrases.ElementAt(index);
 
-                if(!string.IsNullOrEmpty(keyPhrase.Text))
-                {
-                    actions.Add(new CardAction() { Title = keyPhrase.Text, Type = ActionTypes.ImBack, Value = keyPhrase.Text });
+                    if (!string.IsNullOrEmpty(keyPhrase.Text))
+                    {
+                        actions.Add(new CardAction() { Title = keyPhrase.Text, Type = ActionTypes.ImBack, Value = keyPhrase.Text });
+                    }
                 }
             }
 

@@ -49,217 +49,220 @@ namespace StalkHard.Dialogs
                     //Verifica se a intent tem um score suficiente para ser usado
                     if (!string.IsNullOrEmpty(intent.intent) && intent.intent.ToUpper() != "NONE" && intent.score >= 0.30) //30%
                     {
-                        var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
+                        var item = Session.Instance.UserLogin;
 
-                        var client = new FacebookClient();
-                        client.AccessToken = item.AccessTokenFacebook.AccessToken;
-                        client.Version = "v2.10";
-                        client.AppId = ConfigurationManager.AppSettings["appIdFacebook"];
-                        client.AppSecret = ConfigurationManager.AppSettings["appSecretFacebook"];
-
-                        if (intent.intent.Equals("hometown")) //Casos em que eu preciso de mais de uma propriedade
-                            retorno = client.Get("me?fields=" + intent.intent + ",location");
-                        else if (intent.intent.Equals("picture"))
-                            retorno = client.Get("me?fields=" + intent.intent + ",about");
-                        else
-                            retorno = client.Get("me?fields=" + intent.intent);
-
-                        if (retorno.Count > 1)
+                        if (item != null)
                         {
-                            switch (intent.intent)
+                            var client = new FacebookClient();
+                            client.AccessToken = item.AccessTokenFacebook.AccessToken;
+                            client.Version = "v2.10";
+                            client.AppId = ConfigurationManager.AppSettings["appIdFacebook"];
+                            client.AppSecret = ConfigurationManager.AppSettings["appSecretFacebook"];
+
+                            if (intent.intent.Equals("hometown")) //Casos em que eu preciso de mais de uma propriedade
+                                retorno = client.Get("me?fields=" + intent.intent + ",location");
+                            else if (intent.intent.Equals("picture"))
+                                retorno = client.Get("me?fields=" + intent.intent + ",about");
+                            else
+                                retorno = client.Get("me?fields=" + intent.intent);
+
+                            if (retorno.Count > 1)
                             {
-                                case "name":
-                                    response = "Meu nome é " + retorno.name + ", prazer em conhecê-lo! \U0001F600";
+                                switch (intent.intent)
+                                {
+                                    case "name":
+                                        response = "Meu nome é " + retorno.name + ", prazer em conhecê-lo! \U0001F600";
 
-                                    break;
-                                case "birthday":
-                                    string birthday = retorno.birthday;
+                                        break;
+                                    case "birthday":
+                                        string birthday = retorno.birthday;
 
-                                    if (birthday.Count() == 10)
-                                    {
-                                        DateTime dataNasc = Convert.ToDateTime(birthday, CultureInfo.CreateSpecificCulture("en-US"));
-                                        string format = "dd/MM/yyyy";
-
-                                        // Retorna o número de anos
-                                        int anos = DateTime.Now.Year - dataNasc.Year;
-
-                                        // Se a data de aniversário não ocorreu ainda este ano, subtrair um ano a partir da idade
-                                        if (DateTime.Now.Month < dataNasc.Month || (DateTime.Now.Month == dataNasc.Month && DateTime.Now.Day < dataNasc.Day))
+                                        if (birthday.Count() == 10)
                                         {
-                                            anos--;
-                                        }
+                                            DateTime dataNasc = Convert.ToDateTime(birthday, CultureInfo.CreateSpecificCulture("en-US"));
+                                            string format = "dd/MM/yyyy";
 
-                                        response = "Eu nasci em " + dataNasc.ToString(format) + ", tenho " + anos + " anos!";
-                                    }
+                                            // Retorna o número de anos
+                                            int anos = DateTime.Now.Year - dataNasc.Year;
 
-                                    break;
-                                case "email":
-                                    response = "Você pode me contatar no e-mail " + retorno.email + " \U0001F609";
-
-                                    break;
-                                case "education":
-                                    foreach (var educ in retorno.education)
-                                    {
-                                        if (string.IsNullOrEmpty(response))
-                                        {
-                                            response += educ.type + " - " + educ.school.name;
-                                        }
-                                        else
-                                        {
-                                            response += "\n" + educ.type + " - " + educ.school.name;
-                                        }
-                                    }
-
-                                    if (!string.IsNullOrEmpty(response))
-                                    {
-                                        response = ("Este é o meu histórico de ensino:\n\n" + response);
-                                    }
-
-                                    break;
-                                case "hometown":
-                                    if (retorno.Count == 3)
-                                    {
-                                        if (retorno.hometown.name == retorno.location.name)
-                                        {
-                                            response = "Eu moro em " + retorno.location.name;
-                                        }
-                                        else
-                                        {
-                                            response = "Eu sou de " + retorno.hometown.name + ", mas moro em " + retorno.location.name;
-                                        }
-                                    }
-
-                                    break;
-                                case "interested_in":
-                                    response = "Estou interessado em " + string.Join(", ", retorno.interested_in);
-
-                                    break;
-                                case "languages":
-                                    foreach (var language in retorno.languages)
-                                    {
-                                        if (response == "")
-                                        {
-                                            response += language.name;
-                                        }
-                                        else
-                                        {
-                                            response += ", " + language.name;
-                                        }
-                                    }
-
-                                    if (!string.IsNullOrEmpty(response))
-                                    {
-                                        response = "Eu falo " + response;
-                                    }
-
-                                    break;
-                                case "relationship_status":
-                                    response = "Atualmente estou " + retorno.relationship_status;
-
-                                    break;
-                                case "religion":
-                                    response = "Falando em religião, eu sou " + retorno.religion;
-
-                                    break;
-                                case "website":
-                                    response = "Meu site na web é " + retorno.website;
-
-                                    break;
-                                case "picture":
-                                    if (retorno.Count == 3)
-                                    {
-                                        string about = retorno.about;
-
-                                        List<CardImage> cardImages = new List<CardImage>();
-                                        cardImages.Add(new CardImage(url: retorno.picture.data.url));
-
-                                        ThumbnailCard plCard = new ThumbnailCard()
-                                        {
-                                            Title = "Este sou eu! \U0001F603",
-                                            Text = about,
-                                            Images = cardImages,
-                                        };
-
-                                        Attachment attachment = plCard.ToAttachment();
-                                        attachments.Add(attachment);
-                                    }
-                                    else
-                                    {
-                                        response = "Este sou eu! \U0001F603";
-                                        attachments.Add(new Attachment { ContentType = "image/jpg", ContentUrl = retorno.picture.data.url });
-                                    }
-
-                                    break;
-                                case "work":
-                                    foreach (var work in retorno.work)
-                                    {
-                                        string position = "";
-                                        try
-                                        {
-                                            if (work.position.Count > 0)
+                                            // Se a data de aniversário não ocorreu ainda este ano, subtrair um ano a partir da idade
+                                            if (DateTime.Now.Month < dataNasc.Month || (DateTime.Now.Month == dataNasc.Month && DateTime.Now.Day < dataNasc.Day))
                                             {
-                                                position = work.position.name;
+                                                anos--;
                                             }
-                                        }
-                                        catch (Exception ex) { }
 
-                                        if (string.IsNullOrEmpty(response))
+                                            response = "Eu nasci em " + dataNasc.ToString(format) + ", tenho " + anos + " anos!";
+                                        }
+
+                                        break;
+                                    case "email":
+                                        response = "Você pode me contatar no e-mail " + retorno.email + " \U0001F609";
+
+                                        break;
+                                    case "education":
+                                        foreach (var educ in retorno.education)
                                         {
-                                            if (string.IsNullOrEmpty(position))
+                                            if (string.IsNullOrEmpty(response))
                                             {
-                                                response += work.employer.name;
+                                                response += educ.type + " - " + educ.school.name;
                                             }
                                             else
                                             {
-                                                response += position + " - " + work.employer.name;
+                                                response += "\n" + educ.type + " - " + educ.school.name;
                                             }
                                         }
-                                        else
+
+                                        if (!string.IsNullOrEmpty(response))
                                         {
-                                            if (string.IsNullOrEmpty(position))
+                                            response = ("Este é o meu histórico de ensino:\n\n" + response);
+                                        }
+
+                                        break;
+                                    case "hometown":
+                                        if (retorno.Count == 3)
+                                        {
+                                            if (retorno.hometown.name == retorno.location.name)
                                             {
-                                                response += "\n" + work.employer.name;
+                                                response = "Eu moro em " + retorno.location.name;
                                             }
                                             else
                                             {
-                                                response += "\n" + position + " - " + work.employer.name;
+                                                response = "Eu sou de " + retorno.hometown.name + ", mas moro em " + retorno.location.name;
                                             }
                                         }
-                                    }
 
-                                    if (!string.IsNullOrEmpty(response))
-                                    {
-                                        response = ("Estas são as minhas experiências profissionais em ordem decrescente de período:\n\n" + response);
-                                    }
+                                        break;
+                                    case "interested_in":
+                                        response = "Estou interessado em " + string.Join(", ", retorno.interested_in);
 
-                                    break;
-                                case "political":
-                                    response = retorno.political;
-
-                                    break;
-                                case "family":
-                                    foreach (var family in retorno.family.data)
-                                    {
-                                        if (string.IsNullOrEmpty(response))
+                                        break;
+                                    case "languages":
+                                        foreach (var language in retorno.languages)
                                         {
-                                            response = family.name + " (" + family.relationship + ")";
+                                            if (response == "")
+                                            {
+                                                response += language.name;
+                                            }
+                                            else
+                                            {
+                                                response += ", " + language.name;
+                                            }
+                                        }
+
+                                        if (!string.IsNullOrEmpty(response))
+                                        {
+                                            response = "Eu falo " + response;
+                                        }
+
+                                        break;
+                                    case "relationship_status":
+                                        response = "Atualmente estou " + retorno.relationship_status;
+
+                                        break;
+                                    case "religion":
+                                        response = "Falando em religião, eu sou " + retorno.religion;
+
+                                        break;
+                                    case "website":
+                                        response = "Meu site na web é " + retorno.website;
+
+                                        break;
+                                    case "picture":
+                                        if (retorno.Count == 3)
+                                        {
+                                            string about = retorno.about;
+
+                                            List<CardImage> cardImages = new List<CardImage>();
+                                            cardImages.Add(new CardImage(url: retorno.picture.data.url));
+
+                                            ThumbnailCard plCard = new ThumbnailCard()
+                                            {
+                                                Title = "Este sou eu! \U0001F603",
+                                                Text = about,
+                                                Images = cardImages,
+                                            };
+
+                                            Attachment attachment = plCard.ToAttachment();
+                                            attachments.Add(attachment);
                                         }
                                         else
                                         {
-                                            response += "\n" + family.name + " (" + family.relationship + ")";
+                                            response = "Este sou eu! \U0001F603";
+                                            attachments.Add(new Attachment { ContentType = "image/jpg", ContentUrl = retorno.picture.data.url });
                                         }
-                                    }
 
-                                    if (!string.IsNullOrEmpty(response))
-                                    {
-                                        response = ("Estes são alguns membros da minha família:\n\n" + response);
-                                    }
+                                        break;
+                                    case "work":
+                                        foreach (var work in retorno.work)
+                                        {
+                                            string position = "";
+                                            try
+                                            {
+                                                if (work.position.Count > 0)
+                                                {
+                                                    position = work.position.name;
+                                                }
+                                            }
+                                            catch (Exception ex) { }
 
-                                    break;
-                                default:
-                                    response = "Desculpe! Não estou habilitado para falar sobre isso \U0001F614";
+                                            if (string.IsNullOrEmpty(response))
+                                            {
+                                                if (string.IsNullOrEmpty(position))
+                                                {
+                                                    response += work.employer.name;
+                                                }
+                                                else
+                                                {
+                                                    response += position + " - " + work.employer.name;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (string.IsNullOrEmpty(position))
+                                                {
+                                                    response += "\n" + work.employer.name;
+                                                }
+                                                else
+                                                {
+                                                    response += "\n" + position + " - " + work.employer.name;
+                                                }
+                                            }
+                                        }
 
-                                    break;
+                                        if (!string.IsNullOrEmpty(response))
+                                        {
+                                            response = ("Estas são as minhas experiências profissionais em ordem decrescente de período:\n\n" + response);
+                                        }
+
+                                        break;
+                                    case "political":
+                                        response = retorno.political;
+
+                                        break;
+                                    case "family":
+                                        foreach (var family in retorno.family.data)
+                                        {
+                                            if (string.IsNullOrEmpty(response))
+                                            {
+                                                response = family.name + " (" + family.relationship + ")";
+                                            }
+                                            else
+                                            {
+                                                response += "\n" + family.name + " (" + family.relationship + ")";
+                                            }
+                                        }
+
+                                        if (!string.IsNullOrEmpty(response))
+                                        {
+                                            response = ("Estes são alguns membros da minha família:\n\n" + response);
+                                        }
+
+                                        break;
+                                    default:
+                                        response = "Desculpe! Não estou habilitado para falar sobre isso \U0001F614";
+
+                                        break;
+                                }
                             }
                         }
                     }

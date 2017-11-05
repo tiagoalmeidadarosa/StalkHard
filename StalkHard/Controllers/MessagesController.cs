@@ -10,6 +10,8 @@ using System.Linq;
 using Autofac;
 using System.Web.SessionState;
 using System.Web;
+using StalkHard.Models;
+using StalkHard.Services;
 
 namespace StalkHard
 {
@@ -48,6 +50,18 @@ namespace StalkHard
                     // Handle conversation state changes, like members being added and removed
                     // Use Activity.MembersAdded and Activity.MembersRemoved and Activity.Action for info
                     // Not available in all channels
+
+                    //Salvo objeto do usuário em uma sessão, para não precisar ficar fazendo várias chamadas ao banco
+                    if (message.MembersAdded != null && message.MembersAdded.Any())
+                    {
+                        foreach (var newMember in message.MembersAdded)
+                        {
+                            if (newMember.Id != message.Recipient.Id)
+                            {
+                                Session.Instance.UserLogin = await DocumentDBRepository<Login>.GetItemAsync(message.From.Id);
+                            }
+                        }
+                    }
 
                     /*using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
                     {

@@ -30,9 +30,9 @@ namespace StalkHard.Dialogs
 
             if (activity.Text != null)
             {
-                var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
+                var item = Session.Instance.UserLogin;
 
-                if (item.KeyPhrases.Count(k => k.Text.ToUpper().Contains(activity.Text.ToUpper())) > 0)
+                if (item != null && item.KeyPhrases.Count(k => k.Text.ToUpper().Contains(activity.Text.ToUpper())) > 0)
                 {
                     var rand = new Random();
                     var keyPhrase = item.KeyPhrases.First(k => k.Text.ToUpper().Contains(activity.Text.ToUpper()));
