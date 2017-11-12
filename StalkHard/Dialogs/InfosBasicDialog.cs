@@ -16,6 +16,13 @@ namespace StalkHard.Dialogs
     [Serializable]
     public class InfosBasicDialog : IDialog<object>
     {
+        public Login loginUser;
+
+        public InfosBasicDialog(Login loginUser)
+        {
+            this.loginUser = loginUser;
+        }
+
         public Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -33,7 +40,7 @@ namespace StalkHard.Dialogs
 
             await context.PostAsync(reply);
 
-            context.Call(new SelectInfosBasicDialog(), this.ResumeAfterSelectInfosBasicDialog);
+            context.Call(new SelectInfosBasicDialog(loginUser), this.ResumeAfterSelectInfosBasicDialog);
         }
 
         public async Task ResumeAfterSelectInfosBasicDialog(IDialogContext context, IAwaitable<object> result)

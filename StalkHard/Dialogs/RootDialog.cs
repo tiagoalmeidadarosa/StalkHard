@@ -15,6 +15,8 @@ namespace StalkHard.Dialogs
     [Serializable]
     public class RootDialog : IDialog<object>
     {
+        public Login loginUser;
+
         public Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -25,6 +27,8 @@ namespace StalkHard.Dialogs
         private async Task MessageReceivedAsync(IDialogContext context, IAwaitable<object> result)
         {
             var message = await result as Activity;
+
+            this.loginUser = await DocumentDBRepository<Login>.GetItemAsync(message.From.Id);
 
             using (var scope = DialogModule.BeginLifetimeScope(Conversation.Container, message))
             {
@@ -46,9 +50,9 @@ namespace StalkHard.Dialogs
                     }
                 };
 
-                await client.Conversations.ReplyToActivityAsync(reply);
+                await client.Conversations.ReplyToActivityAsync(reply);                    
 
-                context.Call(new SelectRootDialog(), this.ResumeAfterSelectRootDialog);
+                context.Call(new SelectRootDialog(loginUser), this.ResumeAfterSelectRootDialog);
             }
         }
 

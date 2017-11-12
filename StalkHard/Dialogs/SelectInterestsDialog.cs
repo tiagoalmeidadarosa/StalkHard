@@ -22,6 +22,13 @@ namespace StalkHard.Dialogs
     [Serializable]
     public class SelectInterestsDialog : IDialog<object>
     {
+        public Login loginUser;
+
+        public SelectInterestsDialog(Login loginUser)
+        {
+            this.loginUser = loginUser;
+        }
+
         public Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -43,7 +50,7 @@ namespace StalkHard.Dialogs
             reply.AttachmentLayout = AttachmentLayoutTypes.Carousel;
             reply.Attachments = new List<Attachment>();
 
-            var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
+            var item = loginUser;
 
             if (item != null)
             {

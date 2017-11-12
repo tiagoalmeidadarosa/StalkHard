@@ -20,6 +20,13 @@ namespace StalkHard.Dialogs
     [Serializable]
     public class SelectInfosBasicDialog : IDialog<object>
     {
+        public Login loginUser;
+
+        public SelectInfosBasicDialog(Login loginUser)
+        {
+            this.loginUser = loginUser;
+        }
+
         public Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -49,7 +56,7 @@ namespace StalkHard.Dialogs
                     //Verifica se a intent tem um score suficiente para ser usado
                     if (!string.IsNullOrEmpty(intent.intent) && intent.intent.ToUpper() != "NONE" && intent.score >= 0.30) //30%
                     {
-                        var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
+                        var item = loginUser;
 
                         if (item != null)
                         {

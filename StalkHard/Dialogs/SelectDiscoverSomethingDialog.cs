@@ -17,6 +17,13 @@ namespace StalkHard.Dialogs
     [Serializable]
     public class SelectDiscoverSomethingDialog : IDialog<object>
     {
+        public Login loginUser;
+
+        public SelectDiscoverSomethingDialog(Login loginUser)
+        {
+            this.loginUser = loginUser;
+        }
+
         public Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -31,7 +38,7 @@ namespace StalkHard.Dialogs
 
             if (activity.Text != null)
             {
-                var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
+                var item = loginUser;
 
                 if (item != null && item.KeyPhrases.Count(k => k.Text.ToUpper().Contains(activity.Text.ToUpper())) > 0)
                 {

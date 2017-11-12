@@ -14,6 +14,13 @@ namespace StalkHard.Dialogs
     [Serializable]
     public class DiscoverSomethingDialog : IDialog<object>
     {
+        public Login loginUser;
+
+        public DiscoverSomethingDialog(Login loginUser)
+        {
+            this.loginUser = loginUser;
+        }
+
         public Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -25,7 +32,7 @@ namespace StalkHard.Dialogs
         {
             var activity = await result as Activity;
 
-            var item = await DocumentDBRepository<Login>.GetItemAsync(activity.From.Id);
+            var item = loginUser;
 
             List<CardAction> actions = new List<CardAction>();
             List<int> numerosRandom = new List<int>();
@@ -75,7 +82,7 @@ namespace StalkHard.Dialogs
             await context.PostAsync(reply);
 
             if (actions.Count > 0)
-                context.Call(new SelectDiscoverSomethingDialog(), this.ResumeAfterSelectDiscoverSomethingDialog);
+                context.Call(new SelectDiscoverSomethingDialog(loginUser), this.ResumeAfterSelectDiscoverSomethingDialog);
             else
                 context.Wait(MessageReceivedAsync);
         }

@@ -16,6 +16,13 @@ namespace StalkHard.Dialogs
     [Serializable]
     public class SelectRootDialog : IDialog<object>
     {
+        public Login loginUser;
+
+        public SelectRootDialog(Login loginUser)
+        {
+            this.loginUser = loginUser;
+        }
+
         public Task StartAsync(IDialogContext context)
         {
             context.Wait(MessageReceivedAsync);
@@ -35,17 +42,17 @@ namespace StalkHard.Dialogs
                 {
                     case "DESCOBRIR ALGO":
                         //Análise a partir dos tweets, na busca de sentimentos
-                        await context.Forward(new DiscoverSomethingDialog(), this.ResumeAfterDiscoverSomethingDialog, activity, CancellationToken.None);
+                        await context.Forward(new DiscoverSomethingDialog(loginUser), this.ResumeAfterDiscoverSomethingDialog, activity, CancellationToken.None);
 
                         break;
                     case "INTERESSES":
                         //Chama métodos da api do Facebook, para buscar os principais interesses
-                        await context.Forward(new InterestsDialog(), this.ResumeAfterInterestsDialog, activity, CancellationToken.None);
+                        await context.Forward(new InterestsDialog(loginUser), this.ResumeAfterInterestsDialog, activity, CancellationToken.None);
 
                         break;
                     case "INFORMAÇÕES BÁSICAS":
                         //Faz chamadas a API LUIS (Language Understanding Intelligent Service) para entender o que é solicitado
-                        await context.Forward(new InfosBasicDialog(), this.ResumeAfterInfosBasicDialog, activity, CancellationToken.None);
+                        await context.Forward(new InfosBasicDialog(loginUser), this.ResumeAfterInfosBasicDialog, activity, CancellationToken.None);
 
                         break;
                     default:
@@ -96,7 +103,7 @@ namespace StalkHard.Dialogs
             var resultFromSelectInterestsDialog = await result as Activity;
 
             // Chama o diálogo de Descobrir Algo novamente, pois foi solicitado um cancelar
-            await context.Forward(new DiscoverSomethingDialog(), this.ResumeAfterDiscoverSomethingDialog, resultFromSelectInterestsDialog, CancellationToken.None);
+            await context.Forward(new DiscoverSomethingDialog(loginUser), this.ResumeAfterDiscoverSomethingDialog, resultFromSelectInterestsDialog, CancellationToken.None);
         }
 
         public async Task ResumeAfterInterestsDialog(IDialogContext context, IAwaitable<object> result)
@@ -106,7 +113,7 @@ namespace StalkHard.Dialogs
             var resultFromSelectInterestsDialog = await result as Activity;
 
             // Chama o diálogo de Interesses novamente, pois foi solicitado um cancelar
-            await context.Forward(new InterestsDialog(), this.ResumeAfterInterestsDialog, resultFromSelectInterestsDialog, CancellationToken.None);
+            await context.Forward(new InterestsDialog(loginUser), this.ResumeAfterInterestsDialog, resultFromSelectInterestsDialog, CancellationToken.None);
         }
 
         public async Task ResumeAfterInfosBasicDialog(IDialogContext context, IAwaitable<object> result)
@@ -116,7 +123,7 @@ namespace StalkHard.Dialogs
             var resultFromSelectInterestsDialog = await result as Activity;
 
             // Chama o diálogo de Informações Básicas novamente, pois foi solicitado um cancelar
-            await context.Forward(new InfosBasicDialog(), this.ResumeAfterInfosBasicDialog, resultFromSelectInterestsDialog, CancellationToken.None);
+            await context.Forward(new InfosBasicDialog(loginUser), this.ResumeAfterInfosBasicDialog, resultFromSelectInterestsDialog, CancellationToken.None);
         }
     }
 }
