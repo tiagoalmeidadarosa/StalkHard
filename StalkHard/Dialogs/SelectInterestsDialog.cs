@@ -15,6 +15,7 @@ using System.Configuration;
 using AdaptiveCards;
 using Microsoft.Bot.Builder.Location;
 using Microsoft.Bot.Builder.Location.Bing;
+using System.Globalization;
 
 namespace StalkHard.Dialogs
 {
@@ -350,6 +351,95 @@ namespace StalkHard.Dialogs
                             }
 
                             break;
+                        case "LUGARES":
+                        case "PLACES":
+                            retorno = client.Get("me/tagged_places?fields=name,place");
+
+                            var apiKey = ConfigurationManager.AppSettings["BingMapsApiKey"];
+
+                            List<Models.Location> locations = new List<Models.Location>();
+                            foreach (var place in retorno.data)
+                            {
+                                Models.Location location = new Models.Location();
+
+                                Models.GeocodePoint geocodePoint = new Models.GeocodePoint();
+                                geocodePoint.Coordinates = new List<double>();
+                                geocodePoint.Coordinates.Add(place.place.location.latitude); //latitude
+                                geocodePoint.Coordinates.Add(place.place.location.longitude); //longitude
+
+                                location.Point = geocodePoint;
+                                location.Name = place.place.name;
+
+                                try
+                                {
+                                    string endereco = "";
+                                    if (!string.IsNullOrEmpty(place.place.location.street))
+                                        endereco = place.place.location.street;
+
+                                    if (!string.IsNullOrEmpty(place.place.location.city) && !string.IsNullOrEmpty(place.place.location.state))
+                                    {
+                                        if (string.IsNullOrEmpty(endereco))
+                                            endereco += place.place.location.city + "/" + place.place.location.state;
+                                        else
+                                            endereco += " - " + place.place.location.city + "/" + place.place.location.state;
+                                    }
+
+                                    if (!string.IsNullOrEmpty(place.place.location.country))
+                                    {
+                                        if (string.IsNullOrEmpty(endereco))
+                                            endereco += place.place.location.country;
+                                        else
+                                            endereco += " - " + place.place.location.country;
+                                    }
+
+                                    if (!string.IsNullOrEmpty(endereco))
+                                        location.Name += " (" + endereco + ")";
+                                }
+                                catch (Exception ex) { }
+
+                                locations.Add(location);
+                            }
+
+                            var cards = new List<HeroCard>();
+                            int i = 1;
+                            foreach (var location in locations)
+                            {
+                                var heroCard = new HeroCard
+                                {
+                                    Subtitle = location.Name
+                                };
+
+                                if (location.Point != null)
+                                {
+                                    var image = new CardImage(
+                                                    url: new BingGeoSpatialService(apiKey).GetLocationMapImageUrl(location, i)
+                                                );
+
+                                    heroCard.Images = new[] { image };
+
+                                    NumberFormatInfo nfi = new NumberFormatInfo();
+                                    nfi.NumberDecimalSeparator = ".";
+
+                                    var button = new CardAction(
+                                                    type: "openUrl",
+                                                    title: "Abrir no Google Maps",
+                                                    value: "https://maps.google.com/maps?ll=" + location.Point.Coordinates[0].ToString(nfi) + "," + location.Point.Coordinates[1].ToString(nfi)
+                                                 );
+
+                                    heroCard.Buttons = new[] { button };
+                                }
+
+                                cards.Add(heroCard);
+
+                                i++;
+                            }
+
+                            foreach (var card in cards)
+                            {
+                                reply.Attachments.Add(card.ToAttachment());
+                            }
+
+                            break;
                         case "MÚSICAS":
                         case "MUSICAS":
                         case "MUSIC":
@@ -488,84 +578,6 @@ namespace StalkHard.Dialogs
 
                                 Attachment attachment = plCard.ToAttachment();
                                 reply.Attachments.Add(attachment);
-                            }
-
-                            break;
-                        case "LUGARES":
-                        case "PLACES":
-                            retorno = client.Get("me/tagged_places?fields=name,place");
-
-                            var apiKey = ConfigurationManager.AppSettings["BingMapsApiKey"];
-
-                            List<Models.Location> locations = new List<Models.Location>();
-                            foreach (var place in retorno.data)
-                            {
-                                Models.Location location = new Models.Location();
-
-                                Models.GeocodePoint geocodePoint = new Models.GeocodePoint();
-                                geocodePoint.Coordinates = new List<double>();
-                                geocodePoint.Coordinates.Add(place.place.location.latitude); //latitude
-                                geocodePoint.Coordinates.Add(place.place.location.longitude); //longitude
-
-                                location.Point = geocodePoint;
-                                location.Name = place.place.name;
-
-                                try
-                                {
-                                    string endereco = "";
-                                    if (!string.IsNullOrEmpty(place.place.location.street))
-                                        endereco = place.place.location.street;
-
-                                    if (!string.IsNullOrEmpty(place.place.location.city) && !string.IsNullOrEmpty(place.place.location.state))
-                                    {
-                                        if (string.IsNullOrEmpty(endereco))
-                                            endereco += place.place.location.city + "/" + place.place.location.state;
-                                        else
-                                            endereco += " - " + place.place.location.city + "/" + place.place.location.state;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(place.place.location.country))
-                                    {
-                                        if (string.IsNullOrEmpty(endereco))
-                                            endereco += place.place.location.country;
-                                        else
-                                            endereco += " - " + place.place.location.country;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(endereco))
-                                        location.Name += " (" + endereco + ")";
-                                }
-                                catch (Exception ex) { }
-
-                                locations.Add(location);
-                            }
-
-                            var cards = new List<HeroCard>();
-                            int i = 1;
-                            foreach (var location in locations)
-                            {
-                                var heroCard = new HeroCard
-                                {
-                                    Subtitle = location.Name
-                                };
-
-                                if (location.Point != null)
-                                {
-                                    var image =
-                                        new CardImage(
-                                            url: new BingGeoSpatialService(apiKey).GetLocationMapImageUrl(location, i));
-
-                                    heroCard.Images = new[] { image };
-                                }
-
-                                cards.Add(heroCard);
-
-                                i++;
-                            }
-
-                            foreach (var card in cards)
-                            {
-                                reply.Attachments.Add(card.ToAttachment());
                             }
 
                             break;
