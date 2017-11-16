@@ -11,6 +11,7 @@ using System.Net;
 using System.IO;
 using System.Web.Script.Serialization;
 using System.Configuration;
+using Microsoft.ApplicationInsights;
 
 namespace StalkHard.Dialogs
 {
@@ -38,6 +39,18 @@ namespace StalkHard.Dialogs
 
             if (activity.Text != null)
             {
+                //Envia dados para Application Insights Analytics
+                TelemetryClient telemetry = new TelemetryClient();
+                var properties = new Dictionary<string, string> { { "Question", activity.Text }, { "Dialog", "Descobrir Algo" } };
+                if (activity.From != null)
+                {
+                    properties.Add("Name", activity.From.Name);
+                    properties.Add("Channel", activity.ChannelId);
+                    properties.Add("IdChatbot", activity.From.Id);
+                }
+                telemetry.TrackEvent("BotQuestion", properties);
+                //
+
                 var item = loginUser;
 
                 if (item != null && item.KeyPhrases.Count(k => k.Text.ToUpper().Contains(activity.Text.ToUpper())) > 0)
