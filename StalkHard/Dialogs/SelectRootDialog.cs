@@ -10,6 +10,7 @@ using System.Configuration;
 using System.Collections.Generic;
 using Microsoft.Bot.Builder.Dialogs.Internals;
 using Autofac;
+using Microsoft.ApplicationInsights;
 
 namespace StalkHard.Dialogs
 {
@@ -37,8 +38,20 @@ namespace StalkHard.Dialogs
 
             if (activity.Text != null)
             {
+                //Envia dados para Application Insights Analytics
+                TelemetryClient telemetry = new TelemetryClient();
+                var properties = new Dictionary<string, string> { { "Question", activity.Text }, { "Dialog", "Diálogo Inicial" } };
+                if (activity.From != null)
+                {
+                    properties.Add("Name", activity.From.Name);
+                    properties.Add("Channel", activity.ChannelId);
+                    properties.Add("IdChatbot", activity.From.Id);
+                }
+                telemetry.TrackEvent("BotQuestion", properties);
+                //
+
                 //switch case aqui e colocar o 
-                switch(activity.Text.ToUpper())
+                switch (activity.Text.ToUpper())
                 {
                     case "DESCOBRIR ALGO":
                         //Análise a partir dos tweets, na busca de sentimentos

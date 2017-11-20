@@ -16,6 +16,7 @@ using AdaptiveCards;
 using Microsoft.Bot.Builder.Location;
 using Microsoft.Bot.Builder.Location.Bing;
 using System.Globalization;
+using Microsoft.ApplicationInsights;
 
 namespace StalkHard.Dialogs
 {
@@ -65,6 +66,18 @@ namespace StalkHard.Dialogs
                 //Verifica se foi solicitado algum interesse via pergunta
                 if (activity.Text != null)
                 {
+                    //Envia dados para Application Insights Analytics
+                    TelemetryClient telemetry = new TelemetryClient();
+                    var properties = new Dictionary<string, string> { { "Question", activity.Text }, { "Dialog", "Interesses" } };
+                    if (activity.From != null)
+                    {
+                        properties.Add("Name", activity.From.Name);
+                        properties.Add("Channel", activity.ChannelId);
+                        properties.Add("IdChatbot", activity.From.Id);
+                    }
+                    telemetry.TrackEvent("BotQuestion", properties);
+                    //
+
                     string[] words = activity.Text.Split(' ');
                     if (words.Length > 1)
                     {
