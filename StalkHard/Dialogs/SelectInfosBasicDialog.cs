@@ -140,7 +140,25 @@ namespace StalkHard.Dialogs
 
                                         break;
                                     case "interested_in":
-                                        response = "Estou interessado em " + string.Join(", ", retorno.interested_in);
+                                        string[] generos = new string[retorno.interested_in.Count];
+
+                                        for(int i=0; i < generos.Length; i++)
+                                        {
+                                            if(retorno.interested_in[i] == "female")
+                                            {
+                                                generos[i] = "Mulheres";
+                                            }
+                                            else if (retorno.interested_in[i] == "male")
+                                            {
+                                                generos[i] = "Homens";
+                                            }
+                                            else
+                                            {
+                                                generos[i] = retorno.interested_in[i];
+                                            }
+                                        }
+
+                                        response = "Estou interessado em " + string.Join(", ", generos);
 
                                         break;
                                     case "languages":
@@ -163,11 +181,11 @@ namespace StalkHard.Dialogs
 
                                         break;
                                     case "relationship_status":
-                                        response = "Atualmente estou " + retorno.relationship_status;
+                                        response = "Vou responder essa em Inglês: I'm currently " + retorno.relationship_status;
 
                                         break;
                                     case "religion":
-                                        response = "Falando em religião, eu sou " + retorno.religion;
+                                        response = "Falando em religião, a minha é " + retorno.religion;
 
                                         break;
                                     case "website":
