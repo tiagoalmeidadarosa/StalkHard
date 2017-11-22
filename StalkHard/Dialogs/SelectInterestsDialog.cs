@@ -232,12 +232,12 @@ namespace StalkHard.Dialogs
                             break;
                         case "FOTOS":
                         case "PHOTOS":
-                            retorno = client.Get("me/photos?fields=name,link,webp_images");
+                            retorno = client.Get("me/photos?fields=name,link,images");
 
                             foreach (var photo in retorno.data)
                             {
                                 List<CardImage> cardImages = new List<CardImage>();
-                                cardImages.Add(new CardImage(url: photo.webp_images[0].source));
+                                cardImages.Add(new CardImage(url: photo.images[0].source));
 
                                 List<CardAction> cardButtons = new List<CardAction>();
                                 cardButtons.Add(new CardAction()
@@ -380,44 +380,47 @@ namespace StalkHard.Dialogs
                             List<Models.Location> locations = new List<Models.Location>();
                             foreach (var place in retorno.data)
                             {
-                                Models.Location location = new Models.Location();
-
-                                Models.GeocodePoint geocodePoint = new Models.GeocodePoint();
-                                geocodePoint.Coordinates = new List<double>();
-                                geocodePoint.Coordinates.Add(place.place.location.latitude); //latitude
-                                geocodePoint.Coordinates.Add(place.place.location.longitude); //longitude
-
-                                location.Point = geocodePoint;
-                                location.Name = place.place.name;
-
-                                try
+                                if (place.place.location != null)
                                 {
-                                    string endereco = "";
-                                    if (!string.IsNullOrEmpty(place.place.location.street))
-                                        endereco = place.place.location.street;
+                                    Models.Location location = new Models.Location();
 
-                                    if (!string.IsNullOrEmpty(place.place.location.city) && !string.IsNullOrEmpty(place.place.location.state))
+                                    Models.GeocodePoint geocodePoint = new Models.GeocodePoint();
+                                    geocodePoint.Coordinates = new List<double>();
+                                    geocodePoint.Coordinates.Add(place.place.location.latitude); //latitude
+                                    geocodePoint.Coordinates.Add(place.place.location.longitude); //longitude
+
+                                    location.Point = geocodePoint;
+                                    location.Name = place.place.name;
+
+                                    try
                                     {
-                                        if (string.IsNullOrEmpty(endereco))
-                                            endereco += place.place.location.city + "/" + place.place.location.state;
-                                        else
-                                            endereco += " - " + place.place.location.city + "/" + place.place.location.state;
-                                    }
+                                        string endereco = "";
+                                        if (!string.IsNullOrEmpty(place.place.location.street))
+                                            endereco = place.place.location.street;
 
-                                    if (!string.IsNullOrEmpty(place.place.location.country))
-                                    {
-                                        if (string.IsNullOrEmpty(endereco))
-                                            endereco += place.place.location.country;
-                                        else
-                                            endereco += " - " + place.place.location.country;
-                                    }
+                                        if (!string.IsNullOrEmpty(place.place.location.city) && !string.IsNullOrEmpty(place.place.location.state))
+                                        {
+                                            if (string.IsNullOrEmpty(endereco))
+                                                endereco += place.place.location.city + "/" + place.place.location.state;
+                                            else
+                                                endereco += " - " + place.place.location.city + "/" + place.place.location.state;
+                                        }
 
-                                    if (!string.IsNullOrEmpty(endereco))
-                                        location.Name += " (" + endereco + ")";
+                                        if (!string.IsNullOrEmpty(place.place.location.country))
+                                        {
+                                            if (string.IsNullOrEmpty(endereco))
+                                                endereco += place.place.location.country;
+                                            else
+                                                endereco += " - " + place.place.location.country;
+                                        }
+
+                                        if (!string.IsNullOrEmpty(endereco))
+                                            location.Name += " (" + endereco + ")";
+                                    }
+                                    catch (Exception ex) { }
+
+                                    locations.Add(location);
                                 }
-                                catch (Exception ex) { }
-
-                                locations.Add(location);
                             }
 
                             var cards = new List<HeroCard>();
